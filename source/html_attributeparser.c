@@ -1223,7 +1223,7 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
     char* attr_value = NULL;
     char* real_value = NULL;
 
-    if (has_value == true) {
+    if (has_value) {
         // Before we begin, there's potential need to scrub the
         // data at this point: we're particularly looking for
         // whitespace and the start identifier ('"").
