@@ -67,51 +67,59 @@ void HTML_ParseUselessLine(char* html_data, int* offset)
 
 void HTML_ParseAttribute(char* html_data, element_t* element, int* offset)
 {
-	// Allocate memory for the attribute name
-	char* attribute_name = malloc(sizeof(char)*MAX_ATTR_NAME_LEN);
-	int attr_offset = 0;
-    bool has_value = true;
-	int i;
+    bool attr_seeking = true;
 
-	for(i = 0; i < MAX_ATTR_NAME_LEN; i++) {
-        // FIXME: this doesnt work?
-        // Ignore white spaces
-        if (html_data[i + *offset] == ' ') {
-            continue;
+    // <pstyle="ONE"style="TWO"checked>lol</p>
+
+    while(attr_seeking == true) {
+        // Allocate memory for the attribute name
+        char* attribute_name = malloc(sizeof(char)*MAX_ATTR_NAME_LEN);
+        int attr_offset = 0;
+        bool has_value = true;
+        int i;
+
+        for(i = 0; i < MAX_ATTR_NAME_LEN; i++) {
+            // '>' Indicates we've reached the end of the line.
+            if (html_data[i + *offset] == '>') {
+                attr_seeking = false;
+                has_value = false;
+                i += 1;
+                break;
+            }
+            // We've hit an end quote. 
+            else if (html_data[i + *offset] == '"') {
+                continue;
+            }
+            // Ignore any whitespace
+            else if (html_data[i + *offset] == ' ') {
+                continue;
+            }
+            // Non-boolean attributes will end with '='.
+            else if (html_data[i + *offset] == '=') {
+                i += 2;
+                break;
+            } 
+
+            attribute_name[attr_offset] = html_data[i + *offset];
+            attribute_name[attr_offset + 1] = '\0';
+            attr_offset++;
         }
 
-        // Break out if we hit the end of the tag
-        // due to an attribute not having fields.
-        if (html_data[i + *offset] == '>') {
-            has_value = false;
-            i += 1;
+        // Increment the parsing index.
+        *offset += i;
+
+        // Now that we have the name we can begin parsing the content
+        HTML_ParseAttributeContent(html_data, attribute_name, has_value, 
+                                    &element->attributes, offset);
+
+        // Free Buffer
+        free(attribute_name);
+
+        if (html_data[*offset] == '>') {
+            attr_seeking = false;
             break;
         }
-
-        // Attribute name will end at '=' and content
-        // will begin after '"".
-		if (html_data[i + *offset] == '=' && 
-        html_data[i + *offset + 1] == '"') {
-            i += 2;
-            break;
-        }
-
-		attribute_name[attr_offset] = html_data[i + *offset];
-		attribute_name[attr_offset + 1] = '\0';
-		attr_offset++;
-	}
-
-    // Increment the parsing index.
-    *offset += i;
-
-    //printf("found attribute %s\n", attribute_name);
-
-    // Now that we have the name we can begin parsing the content
-    HTML_ParseAttributeContent(html_data, attribute_name, has_value, 
-                                &element->attributes, offset);
-
-	// Free Buffer
-	free(attribute_name);
+    }
 }
 
 //
@@ -157,7 +165,7 @@ element_t HTML_ParseStartTag(char* html_data, int* offset)
     // Create an element from the tag char*.
     new_element.tag = HTML_GetIDFromTagString(tag_name);
 
-    *offset += i;
+    *offset += i + 1;
 
     return new_element;
 }

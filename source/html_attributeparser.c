@@ -1219,10 +1219,28 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
                                         attribute_t* attributes, int* offset)
 {
     // First off - we need to store the value in a char*,
-    // so let's do that.
+    // so let's prep that.
     char* attr_value = NULL;
     char* real_value = NULL;
+
     if (has_value == true) {
+        // Before we begin, there's potential need to scrub the
+        // data at this point: we're particularly looking for
+        // whitespace and the start identifier ('"").
+        bool whitespace = true;
+        while(whitespace) {
+            if (html_data[*offset] != ' ') {
+                whitespace = false;
+                break;
+            } else {
+                *offset += 1;
+            }
+        }
+
+        // Now, if we're at a '"', skip that too.
+        if (html_data[*offset] == '"')
+            *offset += 1;
+
         // Allocate memory for the char* that holds the value.
         attr_value = malloc(sizeof(char)*MAX_ATTR_VAL_LEN);
 
@@ -1230,11 +1248,14 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
         int val_offset = 0;
 
         // Just like BeginParse, iterate through the document.
-        int i;
+        int i = 0;
+
         for (i = 0; i < MAX_ATTR_VAL_LEN; i++) {
             // End of value, break off.
-            if (html_data[i + *offset] == '"')
+            if (html_data[i + *offset] == '"') {
+                i++;
                 break;
+            }
 
             // Otherwise, append to value contents.
             attr_value[val_offset] = html_data[i + *offset];
