@@ -1215,45 +1215,48 @@ valuetype_t HTML_ParseValueTypeAttribute(char* value)
     return valuetype;
 }
 
-void HTML_ParseAttributeContent(char* html_data, char* attribute_name,
+void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_value,
                                         attribute_t* attributes, int* offset)
 {
     // First off - we need to store the value in a char*,
     // so let's do that.
+    char* attr_value = NULL;
+    char* real_value = NULL;
+    if (has_value == true) {
+        // Allocate memory for the char* that holds the value.
+        attr_value = malloc(sizeof(char)*MAX_ATTR_VAL_LEN);
 
-    // Allocate memory for the char* that holds the value.
-    char* attr_value = malloc(sizeof(char)*MAX_ATTR_VAL_LEN);
+        // Store the offset index for the value parsing.
+        int val_offset = 0;
 
-    // Store the offset index for the value parsing.
-    int val_offset = 0;
+        // Just like BeginParse, iterate through the document.
+        int i;
+        for (i = 0; i < MAX_ATTR_VAL_LEN; i++) {
+            // End of value, break off.
+            if (html_data[i + *offset] == '"')
+                break;
 
-    // Just like BeginParse, iterate through the document.
-    int i;
-    for (i = 0; i < MAX_ATTR_VAL_LEN; i++) {
-        // End of value, break off.
-        if (html_data[i + *offset] == '"')
-            break;
+            // Otherwise, append to value contents.
+            attr_value[val_offset] = html_data[i + *offset];
+            attr_value[val_offset + 1] = '\0';
+            val_offset++;
+        }
 
-        // Otherwise, append to value contents.
-        attr_value[val_offset] = html_data[i + *offset];
-        attr_value[val_offset + 1] = '\0';
-        val_offset++;
+        // Update the document position.
+        *offset += i;
+
+        // Now we have a mess to clean up, obviously we don't want
+        // to allocate 512 bytes for every attribute value.
+        real_value = malloc(sizeof(char)*(val_offset + 1));
+
+        // Copy the value data to the optimized char*.
+        for (int j = 0; j < val_offset + 1; j++) {
+            real_value[j] = attr_value[j];
+        }
+
+        // Free the bloaty one.
+        free(attr_value);
     }
-
-    // Update the document position.
-    *offset += i;
-
-    // Now we have a mess to clean up, obviously we don't want
-    // to allocate 512 bytes for every attribute value.
-    char* real_value = malloc(sizeof(char)*(val_offset + 1));
-
-    // Copy the value data to the optimized char*.
-    for (int j = 0; j < val_offset + 1; j++) {
-        real_value[j] = attr_value[j];
-    }
-
-    // Free the bloaty one.
-    free(attr_value);
 
     // Iterate through all supported attributes and fill
     // the value accordingly.

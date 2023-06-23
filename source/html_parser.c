@@ -70,6 +70,7 @@ void HTML_ParseAttribute(char* html_data, element_t* element, int* offset)
 	// Allocate memory for the attribute name
 	char* attribute_name = malloc(sizeof(char)*MAX_ATTR_NAME_LEN);
 	int attr_offset = 0;
+    bool has_value = true;
 	int i;
 
 	for(i = 0; i < MAX_ATTR_NAME_LEN; i++) {
@@ -82,6 +83,8 @@ void HTML_ParseAttribute(char* html_data, element_t* element, int* offset)
         // Break out if we hit the end of the tag
         // due to an attribute not having fields.
         if (html_data[i + *offset] == '>') {
+            has_value = false;
+            i += 1;
             break;
         }
 
@@ -101,8 +104,10 @@ void HTML_ParseAttribute(char* html_data, element_t* element, int* offset)
     // Increment the parsing index.
     *offset += i;
 
+    //printf("found attribute %s\n", attribute_name);
+
     // Now that we have the name we can begin parsing the content
-    HTML_ParseAttributeContent(html_data, attribute_name, 
+    HTML_ParseAttributeContent(html_data, attribute_name, has_value, 
                                 &element->attributes, offset);
 
 	// Free Buffer
