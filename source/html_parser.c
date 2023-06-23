@@ -30,7 +30,6 @@ extern byte HTML_GetIDFromTagString(char* tag_name);
 /*
  * TODO
  * - Add support for the "type" attribute.
- * - Add support for parsing multiple attribtues per element.
  * - Make the DOM Tree.
  */
 
