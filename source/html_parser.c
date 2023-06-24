@@ -78,6 +78,8 @@ void HTML_ParseAttribute(char* html_data, element_t* element, int* offset)
         int i;
 
         for(i = 0; i < MAX_ATTR_NAME_LEN; i++) {
+			//printf("html_data: %c\n", html_data[i + *offset]);
+			//printf("aft html_data: %c\n", html_data[i + *offset+1]);
             // '>' Indicates we've reached the end of the line.
             if (html_data[i + *offset] == '>') {
                 attr_seeking = false;
@@ -89,9 +91,14 @@ void HTML_ParseAttribute(char* html_data, element_t* element, int* offset)
             else if (html_data[i + *offset] == '"') {
                 continue;
             }
-            // Ignore any whitespace
-            else if (html_data[i + *offset] == ' ') {
+            // Ignore any whitespace make sure that the next offset is also a space
+            else if (html_data[i + *offset] == ' ' && html_data[i + *offset + 1] == ' ') {
                 continue;
+            }
+			// checks is there are multiple tags in one line, this will just end on first occurance
+            else if (html_data[i + *offset] == ' ' && html_data[i + *offset+1] != ' ') {
+				attr_offset = '\0';
+				continue;
             }
             // Non-boolean attributes will end with '='.
             else if (html_data[i + *offset] == '=') {
