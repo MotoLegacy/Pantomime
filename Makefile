@@ -1,6 +1,6 @@
 TARGET=pantomime
 
-CFLAGS = -I. -I./source/include -DDEBUG=1 -g
+CFLAGS := -I. -I./source/include
 
 OBJ = source/main.o \
 	  source/html_attributeparser.o \
@@ -8,13 +8,17 @@ OBJ = source/main.o \
 	  source/html_data.o \
 	  source/util.o
 
+ifeq ($(DEBUG),1)
+	CFLAGS += -g
+endif
+
 all: $(OBJ)
 	@echo Linking..
-	@$(CC) $(DEBUG) -o $(TARGET) $(OBJ)
+	@$(CC) $(CFLAGS) -o $(TARGET) $(OBJ)
 	@echo Built!
 
 clean:
-	@rm -rf  *.o $(TARGET) $(TARGET).tgz
+	@rm -rf  source/*.o $(TARGET) $(TARGET).tgz
 	@echo Done
 
 package:
