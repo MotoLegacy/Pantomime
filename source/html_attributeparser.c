@@ -1223,16 +1223,20 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
     char* attr_value = NULL;
     char* real_value = NULL;
 
+
+	//printf("HTML DATA: %s\n", html_data);
+	//printf("ATTR DATA: %s\n", attribute_name);
+
     if (has_value) {
         // Before we begin, there's potential need to scrub the
         // data at this point: we're particularly looking for
-        // whitespace and the start identifier ('"").
+        // whitespace and the start identifier ('"').
         bool whitespace = true;
         while(whitespace) {
             if (html_data[*offset] != ' ') {
                 whitespace = false;
                 break;
-            } else {
+			}else {
                 *offset += 1;
             }
         }
