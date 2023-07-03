@@ -96,6 +96,7 @@ typedef struct {
     uri_t*                  profile;
     text_t*                 prompt;
     bool                    readonly;
+    bool                    required;
     linktypes_t*            rel;
     multilengths_t          rows;
     number_t                rowspan;

@@ -1,5 +1,7 @@
 TARGET=pantomime
-CFLAGS := -I./source/include
+
+CFLAGS := -I. -I./source/include
+
 
 OBJ = source/main.o \
 	  source/html_attributeparser.o \
@@ -8,7 +10,9 @@ OBJ = source/main.o \
 	  source/util.o
 
 ifeq ($(DEBUG),1)
+
 CFLAGS += -g -Wall
+
 endif
 
 all: $(OBJ)
@@ -17,7 +21,7 @@ all: $(OBJ)
 	@echo Built!
 
 clean:
-	@rm -f  source/*.o $(TARGET) $(TARGET).tgz
+	@rm -rf  source/*.o $(TARGET) $(TARGET).tgz
 	@echo Done
 
 package:

@@ -1491,6 +1491,8 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             attributes->readonly = true;
         } else if (strcasecmp(attribute_name, "rel") == 0) {
             attributes->rel = HTML_ParseTextAttribute(real_value);
+        } else if (strcasecmp(attribute_name, "required") == 0) {
+            attributes->required = true;
         } else if (strcasecmp(attribute_name, "rows") == 0) {
             attributes->rows = HTML_ParseLengthAttribute(real_value);
         } else if (strcasecmp(attribute_name, "rowspan") == 0) {
