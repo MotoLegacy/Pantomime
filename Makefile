@@ -2,6 +2,7 @@ TARGET=pantomime
 
 CFLAGS := -I. -I./source/include
 
+
 OBJ = source/main.o \
 	  source/html_attributeparser.o \
 	  source/html_parser.o \
@@ -9,7 +10,9 @@ OBJ = source/main.o \
 	  source/util.o
 
 ifeq ($(DEBUG),1)
-	CFLAGS += -g
+
+CFLAGS += -g -Wall
+
 endif
 
 all: $(OBJ)
