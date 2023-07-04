@@ -15,32 +15,27 @@
 //
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 
-#include <html/html_parser.h>
-#include <prtcl/protocol.h>
+#include <util.h>
+#include <prtcl/protocol_file.h>
 
-int main(int argc, char *argv[])
+char* PRTCL_RetrieveDocument(char* req_uri)
 {
-    // If there aren't any args specified, just close and report
-    // an error, change this when we have an interface.
-    if (argc < 2) {
-        printf("Fatal: Pantomime requires a file to be specified "
-        "as a command line argument. Terminating.\n");
-        return 0;
-    }
-
-    // Have the protocol manager send us the HTML document as
-    // a char*
-    char* html_data = NULL;
-    html_data = PRTCL_RetrieveDocument(argv[1]);
-
-    if (html_data != NULL) {
-        // Send it off to the HTML Parser
-        HTML_BeginParse(html_data);
+    // Check the protocol identifier so we know
+    // how to handle retrieving the document.
+    // file://
+    if (req_uri[0] == 'f' && req_uri[1] == 'i' &&
+    req_uri[2] == 'l' && req_uri[3] == 'e' && 
+    req_uri[4] == ':' && req_uri[5] == '/' &&
+    req_uri[6] == '/') {
+        // Build a new string omitting the protocol
+        char* file_path = Util_BuildStringFromChunk(req_uri, 
+                                        7, strlen(req_uri));
+        return PRTCL_RetrieveFile(file_path);
     } else {
-        printf("Something went wrong, could not start HTML parser.\n");
+        printf("PTRCL_RetrieveDocument: Unknown protocol "
+        "in provided URI '%s'\n", req_uri);
+        return NULL;
     }
-    
-    return 0;
 }
