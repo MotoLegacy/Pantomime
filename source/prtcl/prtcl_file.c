@@ -35,10 +35,7 @@ char* PRTCL_RetrieveFile(char* file_path)
 
     // Toss the HTML data into a char[].
     char html_doc[document_size];
-    int i = -1;
-    int c;
-    while(EOF != (c = fgetc(document)) && ++i < document_size)
-        html_doc[i] = c;
+    fread(html_doc, document_size + 1, 1, document);
 
     // Close file pointer.
     fclose(document);
