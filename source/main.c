@@ -17,7 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "html_parser.h"
+#include <html/html_parser.h>
 
 int main(void)
 {

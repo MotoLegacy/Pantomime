@@ -17,8 +17,8 @@
 #include <stdio.h>
 #include <strings.h>
 
-#include "types.h"
-#include "html_datatype.h"
+#include <types.h>
+#include <html/html_datatype.h>
 
 byte HTML_GetIDFromTagString(char* tag_name)
 {

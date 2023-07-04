@@ -1,13 +1,17 @@
 TARGET=pantomime
 
-CFLAGS := -I. -I./source/include
+CFLAGS := -I. -I./include
 
+COMMON_OBJS = \
+	source/main.o \
+	source/util.o
 
-OBJ = source/main.o \
-	  source/html_attributeparser.o \
-	  source/html_parser.o \
-	  source/html_data.o \
-	  source/util.o
+HTML_OBJS = \
+	source/html/html_attributeparser.o \
+	source/html/html_parser.o \
+	source/html/html_data.o
+
+OBJ = $(COMMON_OBJS) $(HTML_OBJS)
 
 ifeq ($(DEBUG),1)
 
@@ -21,7 +25,8 @@ all: $(OBJ)
 	@echo Built!
 
 clean:
-	@rm -rf  source/*.o $(TARGET) $(TARGET).tgz
+	@find . -type f -name '*.o' -exec rm {} +
+	@rm -rf  $(TARGET) $(TARGET).tgz
 	@echo Done
 
 package:
