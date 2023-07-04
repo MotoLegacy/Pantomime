@@ -20,10 +20,10 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-#include "util.h"
-#include "html_parser.h"
-#include "html_attributeparser.h"
-#include "html_datatype.h"
+#include <util.h>
+#include <html/html_parser.h>
+#include <html/html_attributeparser.h>
+#include <html/html_datatype.h>
 
 extern byte HTML_GetIDFromTagString(char* tag_name);
 

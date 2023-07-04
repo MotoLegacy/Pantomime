@@ -20,9 +20,9 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-#include "util.h"
-#include "html_parser.h"
-#include "html_datatype.h"
+#include <util.h>
+#include <html/html_parser.h>
+#include <html/html_datatype.h>
 
 char* HTML_ParseTextAttribute(char* value)
 {
