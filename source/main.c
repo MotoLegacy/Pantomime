@@ -26,7 +26,9 @@ int main(int argc, char *argv[])
     // an error, change this when we have an interface.
     if (argc < 2) {
         printf("Fatal: Pantomime requires a file to be specified "
-        "as a command line argument. Terminating.\n");
+        "as a command line argument. \nExample: "
+        "pantomime file://tests/simple_document.html\n"
+        "Terminating.\n");
         return 0;
     }
 
