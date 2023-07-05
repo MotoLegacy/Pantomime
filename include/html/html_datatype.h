@@ -20,6 +20,7 @@ typedef struct {
     uri_t*                  background;
     color_t                 bgcolor;
     pixels_t                border;
+    length_t                bottommargin;
     length_t                cellpadding;
     length_t                cellspacing;
     character_t             _char;              // Is this a stupid way to get around typing?
@@ -61,6 +62,7 @@ typedef struct {
     text_t*                 label;
     languagecode_t*         lang;
     cdata_t*                language;
+    length_t                leftmargin;
     color_t                 link;
     uri_t*                  longdesc;
     pixels_t                marginheight;
@@ -98,6 +100,7 @@ typedef struct {
     bool                    readonly;
     bool                    required;
     linktypes_t*            rel;
+    length_t                rightmargin;
     multilengths_t          rows;
     number_t                rowspan;
     trules_t                rules;
@@ -117,6 +120,7 @@ typedef struct {
     frametarget_t*          target;
     color_t                 text;
     text_t*                 title;
+    length_t                topmargin;
     // TODO: These will be a bit more complicated to parse.
     //contenttypes_t          type_content;
     //style_t*                type_style;

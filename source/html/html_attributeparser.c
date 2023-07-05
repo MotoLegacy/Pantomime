@@ -986,9 +986,13 @@ length_t HTML_ParseLengthAttribute(char* value)
         length.len = (int)((float)length.len * 1.33 * 12);
         length.type = LEN_PIXEL;
     } else {
-        printf("HTML_ParseLengthAttribute: Unknown measurement"
-        " in length %s. Ignoring\n", value);
-        length.len = 0;
+        if (last_char >= '0' && last_char <= '9') {
+            length.type = LEN_PIXEL;
+        } else {
+            printf("HTML_ParseLengthAttribute: Unknown measurement"
+            " in length %s. Ignoring\n", value);
+            length.len = 0; 
+        }
     }
 
     return length;
@@ -1169,8 +1173,19 @@ shape_t HTML_ParseShapeAttribute(char* value)
 
 char* HTML_ParseStyleSheetAttribute(char* value)
 {
-    char* dest = malloc(sizeof(char)*(strlen(value) + 1));
-    strcpy(dest, value);
+    int size = strlen(value);
+
+    // If the end of a stylesheet has whitespace,
+    // adjust the size to avoid copying it.
+    if (value[size - 1] == ' ')
+        size -= 1;
+
+    char* dest = malloc(sizeof(char)*(size + 1));
+
+    for (int i = 0; i < size; i++) {
+        dest[i] = value[i];
+    }
+    dest[size + 1] = '\0';
 
     if (dest[strlen(dest) - 1] != ';')
         printf("HTML_ParseStyleSheetAttribute: style \'%s\'"
@@ -1237,9 +1252,26 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             }
         }
 
-        // Now, if we're at a '"', skip that too.
-        if (html_data[*offset] == '"')
+        if (html_data[*offset - 1] == '"' && 
+        html_data[*offset] == '"') {
+            has_value = false;
             *offset += 1;
+            return;
+        } 
+
+        if (html_data[*offset - 1] == ' ' && 
+        html_data[*offset - 2] == '"' &&
+        html_data[*offset] == '"') {
+            has_value = false;
+            *offset += 1;
+            return;
+        }
+
+        // Now, if we're at a '"', skip that too.
+        if (html_data[*offset] == '"') {
+            *offset += 1;
+        }
+            
 
         // Allocate memory for the char* that holds the value.
         attr_value = malloc(sizeof(char)*MAX_ATTR_VAL_LEN);
@@ -1282,7 +1314,7 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
     // Iterate through all supported attributes and fill
     // the value accordingly.
 
-    if (attribute_name[0] == 'a') {
+    if (attribute_name[0] == 'a' || attribute_name[0] == 'A') {
         if (strcasecmp(attribute_name, "abbr") == 0) {
             attributes->abbr = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "accept-charset") == 0) {
@@ -1305,18 +1337,20 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'b') {
+    } else if (attribute_name[0] == 'b' || attribute_name[0] == 'B') {
         if (strcasecmp(attribute_name, "background") == 0) {
             attributes->background = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "bgcolor") == 0) {
             attributes->bgcolor = HTML_ParseColorAttribute(real_value);
         } else if (strcasecmp(attribute_name, "border") == 0) {
             attributes->border = HTML_ParsePixelsAttribute(real_value);
+        } else if (strcasecmp(attribute_name, "bottommargin") == 0) {
+            attributes->bottommargin = HTML_ParseLengthAttribute(real_value);
         } else {
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'c') {
+    } else if (attribute_name[0] == 'c' || attribute_name[0] == 'C') {
         if (strcasecmp(attribute_name, "cellpadding") == 0) {
             attributes->cellpadding = HTML_ParseLengthAttribute(real_value);
         } else if (strcasecmp(attribute_name, "cellspacing") == 0) {
@@ -1359,7 +1393,7 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'd') {
+    } else if (attribute_name[0] == 'd' || attribute_name[0] == 'D') {
         if (strcasecmp(attribute_name, "data") == 0) {
             attributes->data = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "datetime") == 0) {
@@ -1374,14 +1408,14 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'e') {
+    } else if (attribute_name[0] == 'e' || attribute_name[0] == 'E') {
         if (strcasecmp(attribute_name, "enctype") == 0) {
             attributes->enctype = HTML_ParseContentTypesAttribute(real_value);
         } else {
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'f') {
+    } else if (attribute_name[0] == 'f' || attribute_name[0] == 'F') {
         if (strcasecmp(attribute_name, "face") == 0) {
             attributes->face = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "for") == 0) {
@@ -1397,7 +1431,7 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'h') {
+    } else if (attribute_name[0] == 'h' || attribute_name[0] == 'H') {
         if (strcasecmp(attribute_name, "headers") == 0) {
             attributes->headers = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "height") == 0) {
@@ -1414,7 +1448,7 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'i') {
+    } else if (attribute_name[0] == 'i' || attribute_name[0] == 'I') {
         if (strcasecmp(attribute_name, "id") == 0) {
             attributes->id = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "ismap") == 0) {
@@ -1423,13 +1457,15 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'l') {
+    } else if (attribute_name[0] == 'l' || attribute_name[0] == 'L') {
         if (strcasecmp(attribute_name, "label") == 0) {
             attributes->label = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "lang") == 0) {
             attributes->lang = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "language") == 0) {
             attributes->language = HTML_ParseTextAttribute(real_value);
+        } else if (strcasecmp(attribute_name, "leftmargin") == 0) {
+            attributes->leftmargin = HTML_ParseLengthAttribute(real_value);
         } else if (strcasecmp(attribute_name, "link") == 0) {
             attributes->link = HTML_ParseColorAttribute(real_value);
         } else if (strcasecmp(attribute_name, "longdesc") == 0) {
@@ -1438,7 +1474,7 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'm') {
+    } else if (attribute_name[0] == 'm' || attribute_name[0] == 'M') {
         if (strcasecmp(attribute_name, "marginheight") == 0) {
             attributes->marginheight = HTML_ParsePixelsAttribute(real_value);
         } else if (strcasecmp(attribute_name, "marginwidth") == 0) {
@@ -1455,7 +1491,7 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'n') {
+    } else if (attribute_name[0] == 'n' || attribute_name[0] == 'N') {
         if (strcasecmp(attribute_name, "name") == 0) {
             attributes->name = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "nohref") == 0) {
@@ -1470,14 +1506,14 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'o') {
+    } else if (attribute_name[0] == 'o' || attribute_name[0] == 'O') {
         if (strcasecmp(attribute_name, "object") == 0) {
             attributes->object = HTML_ParseTextAttribute(real_value);
         } else {
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'p') {
+    } else if (attribute_name[0] == 'p' || attribute_name[0] == 'P') {
         if (strcasecmp(attribute_name, "profile") == 0) {
             attributes->profile = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "prompt") == 0) {
@@ -1486,13 +1522,15 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'r') {
+    } else if (attribute_name[0] == 'r' || attribute_name[0] == 'R') {
         if (strcasecmp(attribute_name, "readonly") == 0) {
             attributes->readonly = true;
         } else if (strcasecmp(attribute_name, "rel") == 0) {
             attributes->rel = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "required") == 0) {
             attributes->required = true;
+        } else if (strcasecmp(attribute_name, "rightmargin") == 0) {
+            attributes->rightmargin = HTML_ParseLengthAttribute(real_value);
         } else if (strcasecmp(attribute_name, "rows") == 0) {
             attributes->rows = HTML_ParseLengthAttribute(real_value);
         } else if (strcasecmp(attribute_name, "rowspan") == 0) {
@@ -1503,7 +1541,7 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 's') {
+    } else if (attribute_name[0] == 's' || attribute_name[0] == 'S') {
         if (strcasecmp(attribute_name, "scheme") == 0) {
             attributes->scheme = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "scope") == 0) {
@@ -1532,7 +1570,7 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 't') {
+    } else if (attribute_name[0] == 't' || attribute_name[0] == 'T') {
         if (strcasecmp(attribute_name, "tabindex") == 0) {
             attributes->tabindex = HTML_ParseNumberAttribute(real_value);
         } else if (strcasecmp(attribute_name, "target") == 0) {
@@ -1541,18 +1579,20 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             attributes->text = HTML_ParseColorAttribute(real_value);
         } else if (strcasecmp(attribute_name, "title") == 0) {
             attributes->title = HTML_ParseTextAttribute(real_value);
+        } else if (strcasecmp(attribute_name, "topmargin") == 0) {
+            attributes->topmargin = HTML_ParseLengthAttribute(real_value);
         } else {
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'u') {
+    } else if (attribute_name[0] == 'u' || attribute_name[0] == 'U') {
         if (strcasecmp(attribute_name, "usemap") == 0) {
             attributes->usemap = HTML_ParseTextAttribute(real_value);
         } else {
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'v') {
+    } else if (attribute_name[0] == 'v' || attribute_name[0] == 'V') {
         if (strcasecmp(attribute_name, "valign") == 0) {
             attributes->valign = HTML_ParseVAlignAttribute(real_value);
         } else if (strcasecmp(attribute_name, "value") == 0) {
@@ -1569,7 +1609,7 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
         }
-    } else if (attribute_name[0] == 'w') {
+    } else if (attribute_name[0] == 'w' || attribute_name[0] == 'W') {
         if (strcasecmp(attribute_name, "width") == 0) {
             attributes->width = HTML_ParseLengthAttribute(real_value);
         } else {

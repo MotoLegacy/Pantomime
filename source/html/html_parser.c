@@ -83,10 +83,6 @@ void HTML_ParseAttribute(char* html_data, element_t* element, int* offset)
                 i += 1;
                 break;
             }
-            // We've hit an end quote. 
-            else if (html_data[i + *offset] == '"') {
-                continue;
-            }
             // Whitespace
             else if (html_data[i + *offset] == ' ' && i != 0) {
                 // Check to see if this is just a random space
