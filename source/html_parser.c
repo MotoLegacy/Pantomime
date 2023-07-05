@@ -27,6 +27,8 @@
 
 extern byte HTML_GetIDFromTagString(char* tag_name);
 
+extern void HTML_InitializeAttribute(attribute_t* attr);
+
 /*
  * TODO
  * - Add support for the "type" attribute.
@@ -64,6 +66,8 @@ void HTML_ParseUselessLine(char* html_data, int* offset)
     *offset = i;
 }
 
+
+
 void HTML_ParseAttribute(char* html_data, element_t* element, int* offset)
 {
     bool attr_seeking = true;
@@ -93,10 +97,10 @@ void HTML_ParseAttribute(char* html_data, element_t* element, int* offset)
             else if (html_data[i + *offset] == ' ' && html_data[i + *offset + 1] == ' ') {
                 continue;
             }
-			// checks is there are multiple tags in one line, this will just end on first occurance
+            // checks is there are multiple tags in one line, this will just end on first occurance
             else if (html_data[i + *offset] == ' ' && html_data[i + *offset+1] != ' ') {
-				attr_offset = '\0';
-				continue;
+                attr_offset = '\0';
+                continue;
             }
             // Non-boolean attributes will end with '='.
             else if (html_data[i + *offset] == '=') {
@@ -273,6 +277,7 @@ void HTML_BeginParse(char* html_data)
                 // We identified that there is potential for there to
                 // be attributes, so try and parse them.
                 if (new_element.has_attributes == true) {
+                    HTML_InitializeAttribute(&new_element.attributes);
                     HTML_ParseAttribute(html_data, &new_element, &i);
                 }
             }
