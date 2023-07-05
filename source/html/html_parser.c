@@ -68,8 +68,6 @@ void HTML_ParseAttribute(char* html_data, element_t* element, int* offset)
 {
     bool attr_seeking = true;
 
-    // <pstyle="ONE"style="TWO"checked>lol</p>
-
     while(attr_seeking == true) {
         // Allocate memory for the attribute name
         char* attribute_name = malloc(sizeof(char)*MAX_ATTR_NAME_LEN);
@@ -89,11 +87,21 @@ void HTML_ParseAttribute(char* html_data, element_t* element, int* offset)
             else if (html_data[i + *offset] == '"') {
                 continue;
             }
-            // Ignore any whitespace make sure that the next offset is also a space
-            else if (html_data[i + *offset] == ' ' && html_data[i + *offset + 1] == ' ') {
-                continue;
+            // Whitespace
+            else if (html_data[i + *offset] == ' ' && i != 0) {
+                // Check to see if this is just a random space
+                // before attribute content
+                if (html_data[i + *offset + 1] != '=') {
+                    has_value = false;
+                    i++;
+                    break;
+                }
+                // It was, so carry on.
+                else {
+                    continue;
+                }
             }
-			// checks is there are multiple tags in one line, this will just end on first occurance
+            // checks if there are multiple tags in one line, this will just end on first occurance
             else if (html_data[i + *offset] == ' ' && html_data[i + *offset+1] != ' ') {
 				attr_offset = '\0';
 				continue;
@@ -204,7 +212,7 @@ void HTML_ParseEndTag(char* html_data, int* offset)
     *offset += i;
 }
 
-void HTML_CleanDocument(char* html_data)
+char* HTML_CleanDocument(char* html_data)
 {
     int i = 0;
     bool scrubbing = true;
@@ -221,6 +229,23 @@ void HTML_CleanDocument(char* html_data)
             while(html_data[i] == ' ' || html_data[i] == '\t') {
                 html_data = Util_CharDeleteAtIndex(html_data, i);
             }
+        } 
+        // We found a standard space (' ')
+        else if (html_data[i] == ' ') {
+            // Increment the index by one.
+            i++;
+
+            bool multiple_spaces = true;
+            while(multiple_spaces) {
+                // Is this slot a space, too?
+                if (html_data[i] == ' ') {
+                    html_data = Util_CharDeleteAtIndex(html_data, i);
+                } 
+                // It wasn't, stop trying to scrub.
+                else {
+                    multiple_spaces = false;
+                }
+            }
         } else {
             // Increment the index, look at next character.
             i++;
@@ -231,12 +256,14 @@ void HTML_CleanDocument(char* html_data)
             scrubbing = false;
         }
     }
+
+    return html_data;
 }
 
 void HTML_BeginParse(char* html_data)
 {
     // Scrub the document of any trailing/leading whitespace.
-    HTML_CleanDocument(html_data);
+    html_data = HTML_CleanDocument(html_data);
 
     // Start by iterating through the data character by
     // character.
