@@ -22,29 +22,20 @@
 
 #define MAX_TEMP_STR_LEN    512
 
-char* tempstr = NULL;
-
-char* Util_CharDeleteAtIndex(char* src, int index)
+void Util_CharDeleteAtIndex(char* src, int index)
 {
     int len = strlen(src);
 
-    if (tempstr != NULL) {
-        free(tempstr);
-        tempstr = NULL;
+    if (index < 0 || index >= len) {
+        // Invalid index, do nothing
+        return;
     }
 
-    tempstr = malloc(sizeof(char) * (len + 1));
-
-    int j = 0;
-    for(int i = 0; i < len; i++) {
-        if (i != index) {
-            tempstr[j] = src[i];
-            j++;
-        }
+    int i;
+    for (i = index; i < len - 1; i++) {
+        src[i] = src[i + 1];
     }
-    tempstr[j] = '\0';
-
-    return tempstr;
+    src[i] = '\0';
 }
 
 char* Util_BuildStringFromChunk(char* str, int start, int end)

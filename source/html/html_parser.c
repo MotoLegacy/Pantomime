@@ -223,7 +223,7 @@ char* HTML_CleanDocument(char* html_data)
             // While everything after the new line is a space
             // or a tab, re-build the document data without it.
             while(html_data[i] == ' ' || html_data[i] == '\t') {
-                html_data = Util_CharDeleteAtIndex(html_data, i);
+                Util_CharDeleteAtIndex(html_data, i);
             }
         } 
         // We found a standard space (' ')
@@ -235,7 +235,7 @@ char* HTML_CleanDocument(char* html_data)
             while(multiple_spaces) {
                 // Is this slot a space, too?
                 if (html_data[i] == ' ') {
-                    html_data = Util_CharDeleteAtIndex(html_data, i);
+                    Util_CharDeleteAtIndex(html_data, i);
                 } 
                 // It wasn't, stop trying to scrub.
                 else {
