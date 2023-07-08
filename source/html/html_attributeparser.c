@@ -1661,17 +1661,14 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
         } else if (strcasecmp(attribute_name, "rel") == 0) {
             attributes->rel = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "required") == 0) {
-<<<<<<< HEAD:source/html_attributeparser.c
             if(attributes->required != true) {
                 printf("HTML_ParseAttributeContent: Attribute '%s' already defined. Ignoring duplicate definition.\n", attribute_name);
             } else {
                 attributes->required = true;
             }
-=======
             attributes->required = true;
         } else if (strcasecmp(attribute_name, "rightmargin") == 0) {
             attributes->rightmargin = HTML_ParseLengthAttribute(real_value);
->>>>>>> main:source/html/html_attributeparser.c
         } else if (strcasecmp(attribute_name, "rows") == 0) {
             attributes->rows = HTML_ParseLengthAttribute(real_value);
         } else if (strcasecmp(attribute_name, "rowspan") == 0) {

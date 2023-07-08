@@ -101,15 +101,7 @@ void HTML_ParseAttribute(char* html_data, element_t* element, int* offset)
                     continue;
                 }
             }
-<<<<<<< HEAD:source/html_parser.c
-            // Ignore any whitespace make sure that the next offset is also a space
-            else if (html_data[i + *offset] == ' ' && html_data[i + *offset + 1] == ' ') {
-                continue;
-            }
-            // checks is there are multiple tags in one line, this will just end on first occurance
-=======
             // checks if there are multiple tags in one line, this will just end on first occurance
->>>>>>> main:source/html/html_parser.c
             else if (html_data[i + *offset] == ' ' && html_data[i + *offset+1] != ' ') {
                 attr_offset = '\0';
                 continue;
