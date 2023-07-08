@@ -17,8 +17,8 @@
 #include <stdio.h>
 #include <strings.h>
 
-#include "types.h"
-#include "html_datatype.h"
+#include <types.h>
+#include <html/html_datatype.h>
 
 byte HTML_GetIDFromTagString(char* tag_name)
 {
@@ -338,6 +338,10 @@ byte HTML_GetIDFromTagString(char* tag_name)
         return HTML_ELEM_TABLE;
     }
 
+    if (strcasecmp(tag_name, "tbody") == 0) {
+        return HTML_ELEM_TBODY;
+    }
+
     if (strcasecmp(tag_name, "td") == 0) {
         return HTML_ELEM_TD;
     }
@@ -382,6 +386,6 @@ byte HTML_GetIDFromTagString(char* tag_name)
         return HTML_ELEM_VAR;
     }
 
-    printf("* HTML_GetIDFromTagString: Unknown Element: %s\n", tag_name);
+    printf("HTML_GetIDFromTagString: Unknown Element: %s\n", tag_name);
     return HTML_ELEM_ERROR;
 }

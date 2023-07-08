@@ -17,43 +17,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "html_parser.h"
+#include <html/html_parser.h>
+#include <prtcl/protocol.h>
 
-int main(void)
+int main(int argc, char *argv[])
 {
-    // Dummy test case - just grab a document locally.
-    FILE* test_document;
-    test_document = fopen("tests/simple_document.html", "r");
-
-    if (test_document == NULL) {
-        printf("Couldn't find test HTML document.\n");
+    // If there aren't any args specified, just close and report
+    // an error, change this when we have an interface.
+    if (argc < 2) {
+        printf("Fatal: Pantomime requires a file to be specified "
+        "as a command line argument. \nExample: "
+        "pantomime file://tests/simple_document.html\n"
+        "Terminating.\n");
         return 0;
     }
 
-    // Seek to end of dummy file to get its size.
-    fseek(test_document, 0, SEEK_END);
-    int document_size = ftell(test_document);
-    fseek(test_document, 0, SEEK_SET);
+    // Have the protocol manager send us the HTML document as
+    // a char*
+    char* html_data = NULL;
+    html_data = PRTCL_RetrieveDocument(argv[1]);
 
-    // Toss the HTML data into a char[].
-    char document[document_size];
-    int i = -1;
-    int c;
-    while(EOF != (c = fgetc(test_document)) && ++i < document_size)
-        document[i] = c;
-
-    // Close file pointer.
-    fclose(test_document);
-
-    // Now convert HTML data from char[] to char*.
-    char* html_data = malloc(sizeof(char)*document_size);
-    for(int i = 0; i < document_size; i++) {
-        html_data[i] = document[i];
-        html_data[i + 1] = '\0';
+    if (html_data != NULL) {
+        // Send it off to the HTML Parser
+        HTML_BeginParse(html_data);
+    } else {
+        printf("Something went wrong, could not start HTML parser.\n");
     }
-
-    // Send it off to the HTML Parser
-    HTML_BeginParse(html_data);
-
+    
     return 0;
 }
