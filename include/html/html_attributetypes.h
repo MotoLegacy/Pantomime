@@ -13,6 +13,7 @@ typedef char text_t;
 
 //==== %Charsets; ====//
 typedef enum {
+    CS_NONE = -1, 
     CS_ASCII, 
     CS_ANSI, 
     CS_ISO8859, 
@@ -26,6 +27,7 @@ typedef enum {
 // (https://www.geeksforgeeks.org/http-headers-content-type/)
 typedef enum {
     // Application
+    CTYPE_APP_NONE = -1,
     CTYPE_APP_EDIX12,
     CTYPE_APP_EDIFACT,
     CTYPE_APP_JS,
@@ -153,6 +155,7 @@ typedef idref_t idrefs_t;
 
 //==== %TFrame; ====//
 typedef enum {
+    TF_NONE = -1,
     TF_VOID,
     TF_ABOVE,
     TF_BELOW,
@@ -182,7 +185,7 @@ typedef char linktypes_t;
 
 //==== %TRules; ====//
 typedef enum {
-    TR_NONE,
+    TR_NONE = -1,
     TR_GROUPS,
     TR_ROWS,
     TR_COLS,
@@ -191,6 +194,7 @@ typedef enum {
 
 //==== %Scope; ====//
 typedef enum {
+    SCOPE_NONE = -1,
     SCOPE_ROW,
     SCOPE_COL,
     SCOPE_ROWGROUP,
@@ -199,6 +203,7 @@ typedef enum {
 
 //==== %Shape; ====//
 typedef enum {
+    SHAPE_NONE = -1,
     SHAPE_RECT,
     SHAPE_CIRCLE,
     SHAPE_POLY,
@@ -213,6 +218,7 @@ typedef char frametarget_t;
 
 //==== %InputType; ====//
 typedef enum {
+    IT_NONE = -1,
     IT_TEXT,
     IT_PASSWORD,
     IT_CHECKBOX,
@@ -227,6 +233,7 @@ typedef enum {
 
 //==== %ULStyle; ====//
 typedef enum {
+    UL_NONE = -1,
     UL_DISC,
     UL_SQUARE,
     UL_CIRCLE
@@ -236,6 +243,7 @@ typedef enum {
 
 //==== %CAlign;, %IAlign;, %LAlign;, %TAlign; ====//
 typedef enum {
+    ALIGN_NONE = -1,
     ALIGN_TOP,
     ALIGN_LEFT,
     ALIGN_CENTER,
@@ -248,6 +256,7 @@ typedef enum {
 
 //==== %Button; ====//
 typedef enum {
+    BUT_NONE = -1,
     BUT_BUTTON,
     BUT_SUBMIT,
     BUT_RESET
@@ -255,6 +264,7 @@ typedef enum {
 
 //==== %Scroll; ====//
 typedef enum {
+    SCROLL_NONE = -1,
     SCROLL_YES,
     SCROLL_NO,
     SCROLL_AUTO
@@ -265,6 +275,7 @@ typedef char style_t;
 
 //==== %VAlign; ====//
 typedef enum {
+    VA_NONE = -1,
     VA_TOP,
     VA_MIDDLE,
     VA_BOTTOM,
@@ -273,6 +284,7 @@ typedef enum {
 
 //==== %ValueType; ====//
 typedef enum {
+    VT_NONE = -1,
     VT_DATA,
     VT_REF,
     VT_OBJECT
@@ -280,16 +292,18 @@ typedef enum {
 
 //==== %Clear; ====//
 typedef enum {
+    CLEAR_NONE = -1,
     CLEAR_LEFT,
     CLEAR_RIGHT,
     CLEAR_ALL,
-    CLEAR_NONE
 } clear_t;
 
 //==== %Method; ====//
 typedef enum {
+    METHOD_NONE = -1,
     METHOD_GET,
     METHOD_POST
 } method_t;
+
 
 #endif // _HTMLATTRTYPES_H_

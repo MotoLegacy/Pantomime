@@ -24,6 +24,135 @@
 #include <html/html_parser.h>
 #include <html/html_datatype.h>
 
+void HTML_InitializeAttribute(attribute_t* attr) {
+    // A
+    attr->accept_charset    = CS_NONE;
+    attr->accept            = CTYPE_APP_NONE;
+    attr->accesskey         = '\0';
+    attr->action            = NULL;
+    attr->align             = ALIGN_NONE;
+    attr->alt               = NULL;
+    attr->archive           = NULL;
+    attr->axis              = NULL;
+    // B
+    attr->background        = NULL;
+    attr->bgcolor.r         = -1;
+    attr->bgcolor.g         = -1;
+    attr->bgcolor.b         = -1;
+    attr->border            = -1;
+    // C
+    attr->cellpadding.len   = -1;
+    attr->checked           = false;
+    attr->_char             = '\0';
+    attr->class             = NULL;
+    attr->classid           = NULL;
+    attr->clear             = CLEAR_NONE;
+    attr->code              = NULL;
+    attr->codebase          = NULL;
+    attr->codetype          = CTYPE_APP_NONE;
+    attr->color.r           = -1;
+    attr->color.g           = -1;
+    attr->color.b           = -1;
+    attr->cols.len          = -1;
+    attr->colspan           = -1;
+    attr->compact           = NULL;
+    attr->content           = NULL;
+    attr->coords.x          = -1;
+    attr->coords.y          = -1;
+    attr->coords.w          = -1;
+    attr->coords.h          = -1;
+    // D
+    attr->data              = NULL;
+    attr->datetime          = NULL;
+    attr->declare           = false;
+    attr->dir               = false;
+    attr->disabled          = false;
+    // E
+    attr->enctype           = CTYPE_APP_NONE;
+    // F
+    attr->face              = NULL;
+    attr->_for              = NULL;
+    attr->frame             = TF_NONE;
+    attr->frameborder       = false;
+    // H
+    attr->headers           = NULL;
+    attr->height.len        = -1;
+    attr->href              = NULL;
+    attr->hreflang          = NULL;
+    attr->hspace            = -1;
+    attr->http_equiv        = NULL;
+    // I
+    attr->id                = NULL;
+    attr->ismap             = false;
+    // L
+    attr->label             = NULL;
+    attr->lang              = NULL;
+    attr->language          = NULL;
+    attr->link.r            = -1;
+    attr->link.g            = -1;
+    attr->link.b            = -1;
+    attr->longdesc          = NULL;
+    // M
+    attr->marginheight      = -1;
+    attr->marginwidth       = -1;
+    attr->maxlength         = -1;
+    attr->media             = NULL;
+    attr->method            = METHOD_NONE;
+    attr->multiple          = false;
+    // N
+    attr->name              = NULL;
+    attr->nohref            = false;
+    attr->noresize          = false;
+    attr->noshade           = false;
+    attr->nowrap            = false;
+    // O
+    attr->object            = NULL;
+    // P
+    attr->profile           = NULL;
+    attr->prompt            = NULL;
+    // R
+    attr->readonly          = false;
+    attr->rel               = NULL;
+    attr->required          = false;
+    attr->rows.len          = -1;
+    attr->rowspan           = -1;
+    attr->rules             = TR_NONE;
+    // S
+    attr->scheme            = NULL;
+    attr->scrolling         = SCROLL_NONE;
+    attr->selected          = false;
+    attr->shape             = SHAPE_NONE;
+    attr->size              = NULL;
+    attr->span              = -1;
+    attr->src               = NULL;
+    attr->standby           = NULL;
+    attr->start             = -1;
+    attr->style             = NULL;
+    attr->summary           = NULL;
+    // T
+    attr->tabindex          = -1;
+    attr->target            = NULL;
+    attr->text.r            = -1;
+    attr->text.b            = -1;
+    attr->text.g            = -1;
+    attr->title             = NULL;
+    // U
+    attr->usemap            = NULL;
+    // V
+    attr->valign            = VA_NONE;
+    attr->value             = NULL;
+    attr->valuetype         = VT_NONE;
+    attr->version           = NULL;
+    attr->vlink.r           = -1;
+    attr->vlink.g           = -1;
+    attr->vlink.b           = -1;
+    attr->vspace            = -1;
+    // W
+    attr->width.len         = -1;
+
+}
+
+
 char* HTML_ParseTextAttribute(char* value)
 {
     char* dest = malloc(sizeof(char)*(strlen(value) + 1));
@@ -937,12 +1066,12 @@ length_t HTML_ParseLengthAttribute(char* value)
     // being, they all have documented conversion factors:
     // (https://www.w3schools.com/cssref/css_units.php)
     // -----
-    // cm 	centimeters
-    // mm 	millimeters
-    // in 	inches (1in = 96px = 2.54cm)
+    // cm   centimeters
+    // mm   millimeters
+    // in   inches (1in = 96px = 2.54cm)
     // px   pixels (1px = 1/96th of 1in)
-    // pt 	points (1pt = 1/72 of 1in)
-    // pc 	picas (1pc = 12 pt) 
+    // pt   points (1pt = 1/72 of 1in)
+    // pc   picas (1pc = 12 pt) 
     // -----
     // We only use integer precision here though. So there
     // is going to be some inaccuracy. Hopefully it'll never
@@ -1362,7 +1491,11 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
         } else if (strcasecmp(attribute_name, "charset") == 0) {
             attributes->charset = HTML_ParseCharsetsAttribute(real_value);
         } else if (strcasecmp(attribute_name, "checked") == 0) {
-            attributes->checked = true;
+            if(attributes->checked != true) {
+                printf("HTML_ParseAttributeContent: Attribute '%s' already defined. Ignoring duplicate definition.\n", attribute_name);
+            } else {
+                attributes->checked = true;
+            }
         } else if (strcasecmp(attribute_name, "cite") == 0) {
             attributes->cite = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "class") == 0) {
@@ -1528,6 +1661,11 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
         } else if (strcasecmp(attribute_name, "rel") == 0) {
             attributes->rel = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "required") == 0) {
+            if(attributes->required != true) {
+                printf("HTML_ParseAttributeContent: Attribute '%s' already defined. Ignoring duplicate definition.\n", attribute_name);
+            } else {
+                attributes->required = true;
+            }
             attributes->required = true;
         } else if (strcasecmp(attribute_name, "rightmargin") == 0) {
             attributes->rightmargin = HTML_ParseLengthAttribute(real_value);
@@ -1563,7 +1701,11 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
         } else if (strcasecmp(attribute_name, "start") == 0) {
             attributes->start = HTML_ParseNumberAttribute(real_value);
         } else if (strcasecmp(attribute_name, "style") == 0) {
-            attributes->style = HTML_ParseStyleSheetAttribute(real_value);
+            if(attributes->style != NULL) {
+                printf("HTML_ParseAttributeContent: Attribute '%s' already defined. Ignoring duplicate definition.\n", attribute_name);
+            } else {
+                attributes->style = HTML_ParseStyleSheetAttribute(real_value);
+            }
         } else if (strcasecmp(attribute_name, "summary") == 0) {
             attributes->summary = HTML_ParseTextAttribute(real_value);
         } else {
