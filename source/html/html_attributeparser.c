@@ -1723,6 +1723,8 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
             attributes->title = HTML_ParseTextAttribute(real_value);
         } else if (strcasecmp(attribute_name, "topmargin") == 0) {
             attributes->topmargin = HTML_ParseLengthAttribute(real_value);
+        } else if (strcasecmp(attribute_name, "type") == 0) {
+            attributes->type = HTML_ParseTextAttribute(real_value);
         } else {
             printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
             attribute_name);
