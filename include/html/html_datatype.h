@@ -121,10 +121,7 @@ typedef struct {
     color_t                 text;
     text_t*                 title;
     length_t                topmargin;
-    // TODO: These will be a bit more complicated to parse.
-    //contenttypes_t          type_content;
-    //style_t*                type_style;
-    //ulstyle_t               type_ulstyle;
+    cdata_t*                type;
     uri_t*                  usemap;
     valign_t                valign;
     cdata_t*                value;

@@ -23,135 +23,7 @@
 #include <util.h>
 #include <html/html_parser.h>
 #include <html/html_datatype.h>
-
-void HTML_InitializeAttribute(attribute_t* attr) {
-    // A
-    attr->accept_charset    = CS_NONE;
-    attr->accept            = CTYPE_APP_NONE;
-    attr->accesskey         = '\0';
-    attr->action            = NULL;
-    attr->align             = ALIGN_NONE;
-    attr->alt               = NULL;
-    attr->archive           = NULL;
-    attr->axis              = NULL;
-    // B
-    attr->background        = NULL;
-    attr->bgcolor.r         = -1;
-    attr->bgcolor.g         = -1;
-    attr->bgcolor.b         = -1;
-    attr->border            = -1;
-    // C
-    attr->cellpadding.len   = -1;
-    attr->checked           = false;
-    attr->_char             = '\0';
-    attr->class             = NULL;
-    attr->classid           = NULL;
-    attr->clear             = CLEAR_NONE;
-    attr->code              = NULL;
-    attr->codebase          = NULL;
-    attr->codetype          = CTYPE_APP_NONE;
-    attr->color.r           = -1;
-    attr->color.g           = -1;
-    attr->color.b           = -1;
-    attr->cols.len          = -1;
-    attr->colspan           = -1;
-    attr->compact           = NULL;
-    attr->content           = NULL;
-    attr->coords.x          = -1;
-    attr->coords.y          = -1;
-    attr->coords.w          = -1;
-    attr->coords.h          = -1;
-    // D
-    attr->data              = NULL;
-    attr->datetime          = NULL;
-    attr->declare           = false;
-    attr->dir               = false;
-    attr->disabled          = false;
-    // E
-    attr->enctype           = CTYPE_APP_NONE;
-    // F
-    attr->face              = NULL;
-    attr->_for              = NULL;
-    attr->frame             = TF_NONE;
-    attr->frameborder       = false;
-    // H
-    attr->headers           = NULL;
-    attr->height.len        = -1;
-    attr->href              = NULL;
-    attr->hreflang          = NULL;
-    attr->hspace            = -1;
-    attr->http_equiv        = NULL;
-    // I
-    attr->id                = NULL;
-    attr->ismap             = false;
-    // L
-    attr->label             = NULL;
-    attr->lang              = NULL;
-    attr->language          = NULL;
-    attr->link.r            = -1;
-    attr->link.g            = -1;
-    attr->link.b            = -1;
-    attr->longdesc          = NULL;
-    // M
-    attr->marginheight      = -1;
-    attr->marginwidth       = -1;
-    attr->maxlength         = -1;
-    attr->media             = NULL;
-    attr->method            = METHOD_NONE;
-    attr->multiple          = false;
-    // N
-    attr->name              = NULL;
-    attr->nohref            = false;
-    attr->noresize          = false;
-    attr->noshade           = false;
-    attr->nowrap            = false;
-    // O
-    attr->object            = NULL;
-    // P
-    attr->profile           = NULL;
-    attr->prompt            = NULL;
-    // R
-    attr->readonly          = false;
-    attr->rel               = NULL;
-    attr->required          = false;
-    attr->rows.len          = -1;
-    attr->rowspan           = -1;
-    attr->rules             = TR_NONE;
-    // S
-    attr->scheme            = NULL;
-    attr->scrolling         = SCROLL_NONE;
-    attr->selected          = false;
-    attr->shape             = SHAPE_NONE;
-    attr->size              = NULL;
-    attr->span              = -1;
-    attr->src               = NULL;
-    attr->standby           = NULL;
-    attr->start             = -1;
-    attr->style             = NULL;
-    attr->summary           = NULL;
-    // T
-    attr->tabindex          = -1;
-    attr->target            = NULL;
-    attr->text.r            = -1;
-    attr->text.b            = -1;
-    attr->text.g            = -1;
-    attr->title             = NULL;
-    // U
-    attr->usemap            = NULL;
-    // V
-    attr->valign            = VA_NONE;
-    attr->value             = NULL;
-    attr->valuetype         = VT_NONE;
-    attr->version           = NULL;
-    attr->vlink.r           = -1;
-    attr->vlink.g           = -1;
-    attr->vlink.b           = -1;
-    attr->vspace            = -1;
-    // W
-    attr->width.len         = -1;
-
-}
-
+#include <html/html_attributeparser.h>
 
 char* HTML_ParseTextAttribute(char* value)
 {
@@ -163,16 +35,14 @@ char* HTML_ParseTextAttribute(char* value)
 charsets_t HTML_ParseCharsetsAttribute(char* value) 
 {
     charsets_t charset;
+    int result = 0;
 
-    if (strcasecmp(value, "utf-8") == 0) {
-        charset = CS_UTF8;
-    } else if (strcasecmp(value, "iso-8859-1") == 0) {
-        charset = CS_ISO8859;
-    } else if (strcasecmp(value, "ascii") == 0) {
-        charset = CS_ASCII;
-    } else if (strcasecmp(value, "ansi") == 0) {
-        charset = CS_ANSI;
-    } else {
+    GEN_FROM_VALUE(value, "utf-8", CS_UTF8, charset, result);
+    GEN_FROM_VALUE(value, "iso-8859-1", CS_ISO8859, charset, result);
+    GEN_FROM_VALUE(value, "ascii", CS_ASCII, charset, result);
+    GEN_FROM_VALUE(value, "ansi", CS_ANSI, charset, result);
+
+    if (result == 0) {
         printf("HTML_ParseCharsetsAttribute: Unknown charset %s, "
         "defaulting to UTF-8\n", value);
         charset = CS_UTF8;
@@ -184,116 +54,118 @@ charsets_t HTML_ParseCharsetsAttribute(char* value)
 contenttypes_t HTML_ParseContentTypesAttribute(char* value)
 {
     contenttypes_t content_type;
+    int result = 0;
 
-    if (strcasecmp("application/EDI-X12", value) == 0) {
-        content_type = CTYPE_APP_EDIX12;
-    } else if (strcasecmp("application/EDIFACT", value) == 0) {
-        content_type = CTYPE_APP_EDIFACT;
-    } else if (strcasecmp("application/javascript", value) == 0) {
-        content_type = CTYPE_APP_JS;
-    } else if (strcasecmp("application/octet-stream", value) == 0) {
-        content_type = CTYPE_APP_OCTETSTREAM;
-    } else if (strcasecmp("application/ogg", value) == 0) {
-        content_type = CTYPE_APP_OGG;
-    } else if (strcasecmp("application/pdf", value) == 0) {
-        content_type = CTYPE_APP_PDF;
-    } else if (strcasecmp("application/xhtml+xml", value) == 0) {
-        content_type = CTYPE_APP_XHTMLXML;
-    } else if (strcasecmp("application/x-shockwave-flash", value) == 0) {
-        content_type = CTYPE_APP_XSHOCKWAVEFLASH;
-    } else if (strcasecmp("application/json", value) == 0) {
-        content_type = CTYPE_APP_JSON;
-    } else if (strcasecmp("application/ld+json", value) == 0) {
-        content_type = CTYPE_APP_LDJSON;
-    } else if (strcasecmp("application/xml", value) == 0) {
-        content_type = CTYPE_APP_XML;
-    } else if (strcasecmp("application/zip", value) == 0) {
-        content_type = CTYPE_APP_ZIP;
-    } else if (strcasecmp("application/x-www-form-urlencoded", value) == 0) {
-        content_type = CTYPE_APP_XWWWFORMURLENCODED;
-    } else if (strcasecmp("audio/mpeg", value) == 0) {
-        content_type = CTYPE_AUD_MPEG;
-    } else if (strcasecmp("audio/x-ms-wma", value) == 0) {
-        content_type = CTYPE_AUD_XMASWMA;
-    } else if (strcasecmp("audio/vnd.rn-realaudio", value) == 0) {
-        content_type = CTYPE_AUD_VNDRNREALAUDIO;
-    } else if (strcasecmp("audio/x-wav", value) == 0) {
-        content_type = CTYPE_AUD_XWAV;
-    } else if (strcasecmp("image/gif", value) == 0) {
-        content_type = CTYPE_IMG_GIF;
-    } else if (strcasecmp("image/jpeg", value) == 0) {
-        content_type = CTYPE_IMG_JPEG;
-    } else if (strcasecmp("image/png", value) == 0) {
-        content_type = CTYPE_IMG_PNG;
-    } else if (strcasecmp("image/tiff", value) == 0) {
-        content_type = CTYPE_IMG_TIFF;
-    } else if (strcasecmp("image/vnd.microsoft.icon", value) == 0) {
-        content_type = CTYPE_IMG_VNDMICROSOFTICON;
-    } else if (strcasecmp("image/x-icon", value) == 0) {
-        content_type = CTYPE_IMG_XICON;
-    } else if (strcasecmp("image/vnd.djvu", value) == 0) {
-        content_type = CTYPE_IMG_VNDDJVU;
-    } else if (strcasecmp("image/svg+xml", value) == 0) {
-        content_type = CTYPE_IMG_SVGXML;
-    } else if (strcasecmp("multipart/mixed", value) == 0) {
-        content_type = CTYPE_MPA_MIXED;
-    } else if (strcasecmp("multipart/alternative", value) == 0) {
-        content_type = CTYPE_MPA_ALTERNATIVE;
-    } else if (strcasecmp("multipart/related", value) == 0) {
-        content_type = CTYPE_MPA_RELATED;
-    } else if (strcasecmp("multipart/form-data", value) == 0) {
-        content_type = CTYPE_MPA_FORMDATA;
-    } else if (strcasecmp("text/css", value) == 0) {
-        content_type = CTYPE_TXT_CSS;
-    } else if (strcasecmp("text/csv", value) == 0) {
-        content_type = CTYPE_TXT_CSV;
-    } else if (strcasecmp("text/html", value) == 0) {
-        content_type = CTYPE_TXT_HTML;
-    } else if (strcasecmp("text/javascript", value) == 0) {
-        content_type = CTYPE_TXT_JS;
-    } else if (strcasecmp("text/plain", value) == 0) {
-        content_type = CTYPE_TXT_PLAIN;
-    } else if (strcasecmp("text/xml", value) == 0) {
-        content_type = CTYPE_TXT_XML;
-    } else if (strcasecmp("video/mpeg", value) == 0) {
-        content_type = CTYPE_VID_MPEG;
-    } else if (strcasecmp("video/mp4", value) == 0) {
-        content_type = CTYPE_VID_MP4;
-    } else if (strcasecmp("video/quicktime", value) == 0) {
-        content_type = CTYPE_VID_QUICKTIME;
-    } else if (strcasecmp("video/x-ms-wmv", value) == 0) {
-        content_type = CTYPE_VID_XMSWMV;
-    } else if (strcasecmp("video/x-msvideo", value) == 0) {
-        content_type = CTYPE_VID_XMSVIDEO;
-    } else if (strcasecmp("video/x-flv", value) == 0) {
-        content_type = CTYPE_VID_XFLV;
-    } else if (strcasecmp("video/webm", value) == 0) {
-        content_type = CTYPE_VID_WEBM;
-    } else if (strcasecmp("application/vnd.oasis.opendocument.text", value) == 0) {
-        content_type = CTYPE_APP_VNDOASISOPENDOCUMENTTEXT;
-    } else if (strcasecmp("application/vnd.oasis.opendocument.spreadsheet", value) == 0) {
-        content_type = CTYPE_APP_VNDOASISOPENDOCUMENTSPREADSHEET;
-    } else if (strcasecmp("application/vnd.oasis.opendocument.presentation", value) == 0) {
-        content_type = CTYPE_APP_VNDOASISOPENDOCUMENTPRESENTATION;
-    } else if (strcasecmp("application/vnd.oasis.opendocument.graphics", value) == 0) {
-        content_type = CTYPE_APP_VNDOASISOPENDOCUMENTGRAPHICS;
-    } else if (strcasecmp("application/vnd.ms-excel", value) == 0) {
-        content_type = CTYPE_APP_VNDMSEXCEL;
-    } else if (strcasecmp("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", value) == 0) {
-        content_type = CTYPE_APP_VNDOPENXMLFORMATSOFFICEDOCUMENTSPREADSHEET;
-    } else if (strcasecmp("application/vnd.ms-powerpoint", value) == 0) {
-        content_type = CTYPE_APP_VNDMSPOWERPOINT;
-    } else if (strcasecmp("application/vnd.openxmlformats-", value) == 0) {
-        content_type = CTYPE_APP_VNDOPENXMLFORMATS;
-    } else if (strcasecmp("officedocument.presentationml.presentation", value) == 0) {
-        content_type = CTYPE_APP_VNDOPENXMLFORMATSOFFICEDOCUMENTPRESENTATIONMLPRESENTATION;
-    } else if (strcasecmp("application/msword", value) == 0) {
-        content_type = CTYPE_APP_MSWORD;
-    } else if (strcasecmp("officedocument.wordprocessingml.document", value) == 0) {
-        content_type = CTYPE_APP_VNDOPENXMLFORMATSOFFICEDOCUMENTWORDPROCESSINGMLDOCUMENT;
-    } else if (strcasecmp("application/vnd.mozilla.xul+xml", value) == 0) {
-        content_type = CTYPE_APP_VNDMOZILLAXULXML;
-    } else {
+    GEN_FROM_VALUE(value, "application/EDI-X12", 
+                    CTYPE_APP_EDIX12, content_type, result);
+    GEN_FROM_VALUE(value, "application/EDIFACT", 
+                    CTYPE_APP_EDIFACT, content_type, result);
+    GEN_FROM_VALUE(value, "application/javascript", 
+                    CTYPE_APP_JS, content_type, result);
+    GEN_FROM_VALUE(value, "application/octet-stream", 
+                    CTYPE_APP_OCTETSTREAM, content_type, result);
+    GEN_FROM_VALUE(value, "application/ogg", 
+                    CTYPE_APP_OGG, content_type, result);
+    GEN_FROM_VALUE(value, "application/pdf", 
+                    CTYPE_APP_PDF, content_type, result);
+    GEN_FROM_VALUE(value, "application/xhtml+xml", 
+                    CTYPE_APP_XHTMLXML, content_type, result);
+    GEN_FROM_VALUE(value, "application/x-shockwave-flash", 
+                    CTYPE_APP_XSHOCKWAVEFLASH, content_type, result);
+    GEN_FROM_VALUE(value, "application/json",
+                CTYPE_APP_JSON, content_type, result);
+    GEN_FROM_VALUE(value, "application/ld+json",
+                CTYPE_APP_LDJSON, content_type, result);
+    GEN_FROM_VALUE(value, "application/xml",
+                CTYPE_APP_XML, content_type, result);
+    GEN_FROM_VALUE(value, "application/zip",
+                CTYPE_APP_ZIP, content_type, result);
+    GEN_FROM_VALUE(value, "application/x-www-form-urlencoded",
+                CTYPE_APP_XWWWFORMURLENCODED, content_type, result);
+    GEN_FROM_VALUE(value, "audio/mpeg",
+                CTYPE_AUD_MPEG, content_type, result);
+    GEN_FROM_VALUE(value, "audio/x-ms-wma",
+                CTYPE_AUD_XMASWMA, content_type, result);
+    GEN_FROM_VALUE(value, "audio/vnd.rn-realaudio",
+                CTYPE_AUD_VNDRNREALAUDIO, content_type, result);
+    GEN_FROM_VALUE(value, "audio/x-wav",
+                CTYPE_AUD_XWAV, content_type, result);
+    GEN_FROM_VALUE(value, "image/gif",
+                CTYPE_IMG_GIF, content_type, result);
+    GEN_FROM_VALUE(value, "image/jpeg",
+                CTYPE_IMG_JPEG, content_type, result);
+    GEN_FROM_VALUE(value, "image/png",
+                CTYPE_IMG_PNG, content_type, result);
+    GEN_FROM_VALUE(value, "image/tiff",
+                CTYPE_IMG_TIFF, content_type, result);
+    GEN_FROM_VALUE(value, "image/vnd.microsoft.icon",
+                CTYPE_IMG_VNDMICROSOFTICON, content_type, result);
+    GEN_FROM_VALUE(value, "image/x-icon",
+                CTYPE_IMG_XICON, content_type, result);
+    GEN_FROM_VALUE(value, "image/vnd.djvu",
+                CTYPE_IMG_VNDDJVU, content_type, result);
+    GEN_FROM_VALUE(value, "image/svg+xml",
+                CTYPE_IMG_SVGXML, content_type, result);
+    GEN_FROM_VALUE(value, "multipart/mixed",
+                CTYPE_MPA_MIXED, content_type, result);
+    GEN_FROM_VALUE(value, "multipart/alternative",
+                CTYPE_MPA_ALTERNATIVE, content_type, result);
+    GEN_FROM_VALUE(value, "multipart/related",
+                CTYPE_MPA_RELATED, content_type, result);
+    GEN_FROM_VALUE(value, "multipart/form-data",
+                CTYPE_MPA_FORMDATA, content_type, result);
+    GEN_FROM_VALUE(value, "text/css",
+                CTYPE_TXT_CSS, content_type, result);
+    GEN_FROM_VALUE(value, "text/csv",
+                CTYPE_TXT_CSV, content_type, result);
+    GEN_FROM_VALUE(value, "text/html",
+                CTYPE_TXT_HTML, content_type, result);
+    GEN_FROM_VALUE(value, "text/javascript",
+                CTYPE_TXT_JS, content_type, result);
+    GEN_FROM_VALUE(value, "text/plain",
+                CTYPE_TXT_PLAIN, content_type, result);
+    GEN_FROM_VALUE(value, "text/xml",
+                CTYPE_TXT_XML, content_type, result);
+    GEN_FROM_VALUE(value, "video/mpeg",
+                CTYPE_VID_MPEG, content_type, result);
+    GEN_FROM_VALUE(value, "video/mp4",
+                CTYPE_VID_MP4, content_type, result);
+    GEN_FROM_VALUE(value, "video/quicktime",
+                CTYPE_VID_QUICKTIME, content_type, result);
+    GEN_FROM_VALUE(value, "video/x-ms-wmv",
+                CTYPE_VID_XMSWMV, content_type, result);
+    GEN_FROM_VALUE(value, "video/x-msvideo",
+                CTYPE_VID_XMSVIDEO, content_type, result);
+    GEN_FROM_VALUE(value, "video/x-flv",
+                CTYPE_VID_XFLV, content_type, result);
+    GEN_FROM_VALUE(value, "video/webm",
+                CTYPE_VID_WEBM, content_type, result);
+    GEN_FROM_VALUE(value, "application/vnd.oasis.opendocument.text",
+                CTYPE_APP_VNDOASISOPENDOCUMENTTEXT, content_type, result);
+    GEN_FROM_VALUE(value, "application/vnd.oasis.opendocument.spreadsheet",
+                CTYPE_APP_VNDOASISOPENDOCUMENTSPREADSHEET, content_type, result);
+    GEN_FROM_VALUE(value, "application/vnd.oasis.opendocument.presentation",
+                CTYPE_APP_VNDOASISOPENDOCUMENTPRESENTATION, content_type, result);
+    GEN_FROM_VALUE(value, "application/vnd.oasis.opendocument.graphics",
+                CTYPE_APP_VNDOASISOPENDOCUMENTGRAPHICS, content_type, result);
+    GEN_FROM_VALUE(value, "application/vnd.ms-excel",
+                CTYPE_APP_VNDMSEXCEL, content_type, result);
+    GEN_FROM_VALUE(value, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                CTYPE_APP_VNDOPENXMLFORMATSOFFICEDOCUMENTSPREADSHEET, content_type, result);
+    GEN_FROM_VALUE(value, "application/vnd.ms-powerpoint",
+                CTYPE_APP_VNDMSPOWERPOINT, content_type, result);
+    GEN_FROM_VALUE(value, "application/vnd.openxmlformats-",
+                CTYPE_APP_VNDOPENXMLFORMATS, content_type, result);
+    GEN_FROM_VALUE(value, "officedocument.presentationml.presentation",
+                CTYPE_APP_VNDOPENXMLFORMATSOFFICEDOCUMENTPRESENTATIONMLPRESENTATION, content_type, result);
+    GEN_FROM_VALUE(value, "application/msword",
+                CTYPE_APP_MSWORD, content_type, result);
+    GEN_FROM_VALUE(value, "officedocument.wordprocessingml.document",
+                CTYPE_APP_VNDOPENXMLFORMATSOFFICEDOCUMENTWORDPROCESSINGMLDOCUMENT, content_type, result);
+    GEN_FROM_VALUE(value, "application/vnd.mozilla.xul+xml",
+                CTYPE_APP_VNDMOZILLAXULXML, content_type, result);
+    
+    if (result == 0) {
         printf("HTML_ParseContentTypesAttribute: Unknown content type %s, \
         defaulting to text/plain\n", value);
         content_type = CTYPE_TXT_PLAIN;
@@ -315,24 +187,18 @@ char HTML_ParseCharacterAttribute(char* value)
 align_t HTML_ParseAlignAttribute(char* value)
 {
     align_t align;
+    int result = 0;
 
-    if (strcasecmp("top", value) == 0) {
-        align = ALIGN_TOP;
-    } else if (strcasecmp("left", value) == 0) {
-        align = ALIGN_LEFT;
-    } else if (strcasecmp("center", value) == 0) {
-        align = ALIGN_CENTER;
-    } else if (strcasecmp("right", value) == 0) {
-        align = ALIGN_RIGHT;
-    } else if (strcasecmp("bottom", value) == 0) {
-        align = ALIGN_BOTTOM;
-    } else if (strcasecmp("middle", value) == 0) {
-        align = ALIGN_MIDDLE;
-    } else if (strcasecmp("justify", value) == 0) {
-        align = ALIGN_JUSTIFY;
-    } else if (strcasecmp("char", value) == 0) {
-        align = ALIGN_CHAR;
-    } else {
+    GEN_FROM_VALUE(value, "top", ALIGN_TOP, align, result);
+    GEN_FROM_VALUE(value, "left", ALIGN_LEFT, align, result);
+    GEN_FROM_VALUE(value, "center", ALIGN_CENTER, align, result);
+    GEN_FROM_VALUE(value, "right", ALIGN_RIGHT, align, result);
+    GEN_FROM_VALUE(value, "bottom", ALIGN_BOTTOM, align, result);
+    GEN_FROM_VALUE(value, "middle", ALIGN_MIDDLE, align, result);
+    GEN_FROM_VALUE(value, "justify", ALIGN_JUSTIFY, align, result);
+    GEN_FROM_VALUE(value, "char", ALIGN_CHAR, align, result);
+
+    if (result == 0) {
         printf("HTML_ParseAlignAttribute: Unknown alignment %s,"
         " ignoring.", value);
     }
@@ -404,597 +270,169 @@ color_t HTML_ParseColorAttribute(char* value)
     // Color names
     //
     else {
+        int result = 0;
+
         //
         // Standard HTML 4.01 colors
         // https://en.wikipedia.org/wiki/Web_colors#Basic_colors
         //
-        if (strcasecmp("white", value) == 0) {
-            color.r = 255;
-            color.g = 255;
-            color.b = 255;
-        } else if (strcasecmp("silver", value) == 0) {
-            color.r = 191;
-            color.g = 191;
-            color.b = 191;
-        } else if (strcasecmp("gray", value) == 0) {
-            color.r = 128;
-            color.g = 128;
-            color.b = 128;
-        } else if (strcasecmp("black", value) == 0) {
-            color.r = 0;
-            color.g = 0;
-            color.b = 0;
-        } else if (strcasecmp("red", value) == 0) {
-            color.r = 255;
-            color.g = 0;
-            color.b = 0;
-        } else if (strcasecmp("maroon", value) == 0) {
-            color.r = 128;
-            color.g = 0;
-            color.b = 0;
-        } else if (strcasecmp("yellow", value) == 0) {
-            color.r = 255;
-            color.g = 255;
-            color.b = 0;
-        } else if (strcasecmp("olive", value) == 0) {
-            color.r = 128;
-            color.g = 128;
-            color.b = 0;
-        } else if (strcasecmp("lime", value) == 0) {
-            color.r = 0;
-            color.g = 255;
-            color.b = 0;
-        } else if (strcasecmp("green", value) == 0) {
-            color.r = 0;
-            color.g = 128;
-            color.b = 0;
-        } else if (strcasecmp("aqua", value) == 0) {
-            color.r = 0;
-            color.g = 255;
-            color.b = 255;
-        } else if (strcasecmp("teal", value) == 0) {
-            color.r = 0;
-            color.g = 128;
-            color.b = 128;
-        } else if (strcasecmp("blue", value) == 0) {
-            color.r = 0;
-            color.g = 0;
-            color.b = 255;
-        }  else if (strcasecmp("navy", value) == 0) {
-            color.r = 0;
-            color.g = 0;
-            color.b = 128;
-        } else if (strcasecmp("fuschia", value) == 0) {
-            color.r = 255;
-            color.g = 0;
-            color.b = 255;
-        } else if (strcasecmp("purple", value) == 0) {
-            color.r = 128;
-            color.g = 0;
-            color.b = 128;
-        }
+        COLOR_FROM_NAME(value, "white", 255, 255, 255, color, result);
+        COLOR_FROM_NAME(value, "silver", 191, 191, 191, color, result);
+        COLOR_FROM_NAME(value, "gray", 128, 128, 128, color, result);
+        COLOR_FROM_NAME(value, "black", 0, 0, 0, color, result);
+        COLOR_FROM_NAME(value, "red", 255, 0, 0, color, result);
+        COLOR_FROM_NAME(value, "maroon", 128, 0, 0, color, result);
+        COLOR_FROM_NAME(value, "yellow", 255, 255, 0, color, result);
+        COLOR_FROM_NAME(value, "olive", 128, 128, 0, color, result);
+        COLOR_FROM_NAME(value, "lime", 0, 255, 0, color, result);
+        COLOR_FROM_NAME(value, "green", 0, 128, 0, color, result);
+        COLOR_FROM_NAME(value, "aqua", 0, 255, 255, color, result);
+        COLOR_FROM_NAME(value, "teal", 0, 128, 128, color, result);
+        COLOR_FROM_NAME(value, "blue", 0, 0, 255, color, result);
+        COLOR_FROM_NAME(value, "navy", 0, 0, 128, color, result);
+        COLOR_FROM_NAME(value, "fuschia", 255, 0, 255, color, result);
+        COLOR_FROM_NAME(value, "purple", 128, 0, 128, color, result);
         //
         // Extended HTML colors
         // https://en.wikipedia.org/wiki/Web_colors#Extended_colors
         //
         // Pink colors
-        else if (strcasecmp("mediumvioletred", value) == 0) {
-            color.r = 199;
-            color.g = 21;
-            color.b = 133;
-        } else if (strcasecmp("deeppink", value) == 0) {
-            color.r = 255;
-            color.g = 20;
-            color.b = 147;
-        } else if (strcasecmp("palevioletred", value) == 0) {
-            color.r = 219;
-            color.g = 112;
-            color.b = 147;
-        } else if (strcasecmp("hotpink", value) == 0) {
-            color.r = 255;
-            color.g = 105;
-            color.b = 180;
-        } else if (strcasecmp("lightpink", value) == 0) {
-            color.r = 255;
-            color.g = 182;
-            color.b = 193;
-        } else if (strcasecmp("pink", value) == 0) {
-            color.r = 255;
-            color.g = 192;
-            color.b = 203;
-        } 
+        COLOR_FROM_NAME(value, "mediumvioletred", 199, 21, 133, color, result);
+        COLOR_FROM_NAME(value, "deeppink", 255, 20, 147, color, result);
+        COLOR_FROM_NAME(value, "palevioletred", 219, 112, 147, color, result);
+        COLOR_FROM_NAME(value, "hotpink", 255, 105, 180, color, result);
+        COLOR_FROM_NAME(value, "lightpink", 255, 182, 193, color, result);
+        COLOR_FROM_NAME(value, "pink", 255, 192, 203, color, result);
         // Red colors
-        else if (strcasecmp("darkred", value) == 0) {
-            color.r = 139;
-            color.g = 0;
-            color.b = 0;
-        } else if (strcasecmp("firebrick", value) == 0) {
-            color.r = 178;
-            color.g = 34;
-            color.b = 34;
-        } else if (strcasecmp("crimson", value) == 0) {
-            color.r = 220;
-            color.g = 20;
-            color.b = 60;
-        } else if (strcasecmp("indianred", value) == 0) {
-            color.r = 205;
-            color.g = 92;
-            color.b = 92;
-        } else if (strcasecmp("lightcoral", value) == 0) {
-            color.r = 240;
-            color.g = 128;
-            color.b = 128;
-        } else if (strcasecmp("salmon", value) == 0) {
-            color.r = 250;
-            color.g = 128;
-            color.b = 114;
-        } else if (strcasecmp("darksalmon", value) == 0) {
-            color.r = 233;
-            color.g = 150;
-            color.b = 122;
-        } else if (strcasecmp("lightsalmon", value) == 0) {
-            color.r = 255;
-            color.g = 160;
-            color.b = 122;
-        } 
+        COLOR_FROM_NAME(value, "darkred", 139, 0, 0, color, result);
+        COLOR_FROM_NAME(value, "firebrick", 178, 34, 34, color, result);
+        COLOR_FROM_NAME(value, "crimson", 220, 20, 60, color, result);
+        COLOR_FROM_NAME(value, "indianred", 205, 92, 92, color, result);
+        COLOR_FROM_NAME(value, "lightcoral", 240, 128, 128, color, result);
+        COLOR_FROM_NAME(value, "salmon", 250, 128, 114, color, result);
+        COLOR_FROM_NAME(value, "darksalmon", 233, 150, 122, color, result);
+        COLOR_FROM_NAME(value, "lightsalmon", 255, 160, 122, color, result);
         // Orange colors
-        else if (strcasecmp("orangered", value) == 0) {
-            color.r = 255;
-            color.g = 69;
-            color.b = 0;
-        } else if (strcasecmp("tomato", value) == 0) {
-            color.r = 255;
-            color.g = 99;
-            color.b = 71;
-        } else if (strcasecmp("darkorange", value) == 0) {
-            color.r = 255;
-            color.g = 140;
-            color.b = 0;
-        } else if (strcasecmp("coral", value) == 0) {
-            color.r = 255;
-            color.g = 127;
-            color.b = 80;
-        } else if (strcasecmp("orange", value) == 0) {
-            color.r = 255;
-            color.g = 165;
-            color.b = 0;
-        } 
+        COLOR_FROM_NAME(value, "orangered", 255, 69, 0, color, result);
+        COLOR_FROM_NAME(value, "tomato", 255, 99, 71, color, result);
+        COLOR_FROM_NAME(value, "darkorange", 255, 140, 0, color, result);
+        COLOR_FROM_NAME(value, "coral", 255, 127, 80, color, result);
+        COLOR_FROM_NAME(value, "orange", 255, 165, 0, color, result);
         // Yellow colors
-        else if (strcasecmp("darkkhaki", value) == 0) {
-            color.r = 189;
-            color.g = 183;
-            color.b = 107;
-        } else if (strcasecmp("gold", value) == 0) {
-            color.r = 255;
-            color.g = 215;
-            color.b = 0;
-        } else if (strcasecmp("khaki", value) == 0) {
-            color.r = 240;
-            color.g = 230;
-            color.b = 140;
-        } else if (strcasecmp("peachpuff", value) == 0) {
-            color.r = 255;
-            color.g = 218;
-            color.b = 185;
-        } else if (strcasecmp("palegoldenrod", value) == 0) {
-            color.r = 238;
-            color.g = 232;
-            color.b = 170;
-        } else if (strcasecmp("moccasin", value) == 0) {
-            color.r = 255;
-            color.g = 228;
-            color.b = 181;
-        } else if (strcasecmp("papayawhip", value) == 0) {
-            color.r = 255;
-            color.g = 239;
-            color.b = 213;
-        } else if (strcasecmp("lightgoldenrodyellow", value) == 0) {
-            color.r = 250;
-            color.g = 250;
-            color.b = 210;
-        } else if (strcasecmp("lemonchiffon", value) == 0) {
-            color.r = 255;
-            color.g = 250;
-            color.b = 205;
-        } else if (strcasecmp("lightyellow", value) == 0) {
-            color.r = 255;
-            color.g = 255;
-            color.b = 224;
-        } 
+        COLOR_FROM_NAME(value, "darkkhaki", 189, 183, 107, color, result);
+        COLOR_FROM_NAME(value, "gold", 255, 215, 0, color, result);
+        COLOR_FROM_NAME(value, "khaki", 240, 230, 140, color, result);
+        COLOR_FROM_NAME(value, "peachpuff", 255, 218, 185, color, result);
+        COLOR_FROM_NAME(value, "palegoldenrod", 238, 232, 170, color, result);
+        COLOR_FROM_NAME(value, "moccasin", 255, 228, 181, color, result);
+        COLOR_FROM_NAME(value, "papayawhip", 255, 239, 213, color, result);
+        COLOR_FROM_NAME(value, "lightgoldenrodyellow", 250, 250, 210, color, result);
+        COLOR_FROM_NAME(value, "lemonchiffon", 255, 250, 205, color, result);
+        COLOR_FROM_NAME(value, "lightyellow", 255, 255, 224, color, result);
         // Brown colors
-        else if (strcasecmp("brown", value) == 0) {
-            color.r = 165;
-            color.g = 42;
-            color.b = 42;
-        } else if (strcasecmp("saddlebrown", value) == 0) {
-            color.r = 139;
-            color.g = 69;
-            color.b = 19;
-        } else if (strcasecmp("sienna", value) == 0) {
-            color.r = 160;
-            color.g = 82;
-            color.b = 45;
-        } else if (strcasecmp("chocolate", value) == 0) {
-            color.r = 210;
-            color.g = 105;
-            color.b = 30;
-        } else if (strcasecmp("darkgoldenrod", value) == 0) {
-            color.r = 184;
-            color.g = 134;
-            color.b = 11;
-        } else if (strcasecmp("peru", value) == 0) {
-            color.r = 205;
-            color.g = 133;
-            color.b = 63;
-        } else if (strcasecmp("rosybrown", value) == 0) {
-            color.r = 188;
-            color.g = 143;
-            color.b = 143;
-        } else if (strcasecmp("goldenrod", value) == 0) {
-            color.r = 218;
-            color.g = 165;
-            color.b = 32;
-        } else if (strcasecmp("sandybrown", value) == 0) {
-            color.r = 244;
-            color.g = 164;
-            color.b = 96;
-        } else if (strcasecmp("tan", value) == 0) {
-            color.r = 210;
-            color.g = 180;
-            color.b = 140;
-        } else if (strcasecmp("burlywood", value) == 0) {
-            color.r = 222;
-            color.g = 184;
-            color.b = 135;
-        } else if (strcasecmp("wheat", value) == 0) {
-            color.r = 245;
-            color.g = 222;
-            color.b = 179;
-        } else if (strcasecmp("navajowhite", value) == 0) {
-            color.r = 255;
-            color.g = 222;
-            color.b = 173;
-        } else if (strcasecmp("bisque", value) == 0) {
-            color.r = 255;
-            color.g = 228;
-            color.b = 196;
-        } else if (strcasecmp("blanchedalmond", value) == 0) {
-            color.r = 255;
-            color.g = 235;
-            color.b = 205;
-        } else if (strcasecmp("cornsilk", value) == 0) {
-            color.r = 255;
-            color.g = 248;
-            color.b = 220;
-        } 
+        COLOR_FROM_NAME(value, "brown", 165, 42, 42, color, result);
+        COLOR_FROM_NAME(value, "saddlebrown", 139, 69, 19, color, result);
+        COLOR_FROM_NAME(value, "sienna", 160, 82, 45, color, result);
+        COLOR_FROM_NAME(value, "chocolate", 210, 105, 30, color, result);
+        COLOR_FROM_NAME(value, "darkgoldenrod", 184, 134, 11, color, result);
+        COLOR_FROM_NAME(value, "peru", 205, 133, 63, color, result);
+        COLOR_FROM_NAME(value, "rosybrown", 188, 143, 143, color, result);
+        COLOR_FROM_NAME(value, "goldenrod", 218, 165, 32, color, result);
+        COLOR_FROM_NAME(value, "sandybrown", 244, 164, 96, color, result);
+        COLOR_FROM_NAME(value, "tan", 210, 180, 140, color, result);
+        COLOR_FROM_NAME(value, "burlywood", 222, 184, 135, color, result);
+        COLOR_FROM_NAME(value, "wheat", 245, 222, 179, color, result);
+        COLOR_FROM_NAME(value, "navajowhite", 255, 222, 173, color, result);
+        COLOR_FROM_NAME(value, "bisque", 255, 228, 196, color, result);
+        COLOR_FROM_NAME(value, "blanchedalmond", 255, 235, 205, color, result);
+        COLOR_FROM_NAME(value, "cornsilk", 255, 248, 220, color, result);
         // Purple, violet, and magenta colors
-        else if (strcasecmp("indigo", value) == 0) {
-            color.r = 75;
-            color.g = 0;
-            color.b = 130;
-        } else if (strcasecmp("darkmagenta", value) == 0) {
-            color.r = 139;
-            color.g = 0;
-            color.b = 139;
-        } else if (strcasecmp("darkviolet", value) == 0) {
-            color.r = 148;
-            color.g = 0;
-            color.b = 211;
-        } else if (strcasecmp("darkslateblue", value) == 0) {
-            color.r = 72;
-            color.g = 61;
-            color.b = 139;
-        } else if (strcasecmp("blueviolet", value) == 0) {
-            color.r = 138;
-            color.g = 43;
-            color.b = 226;
-        } else if (strcasecmp("darkorchid", value) == 0) {
-            color.r = 153;
-            color.g = 50;
-            color.b = 204;
-        } else if (strcasecmp("magenta", value) == 0) {
-            color.r = 255;
-            color.g = 0;
-            color.b = 255;
-        } else if (strcasecmp("slateblue", value) == 0) {
-            color.r = 106;
-            color.g = 90;
-            color.b = 205;
-        } else if (strcasecmp("mediumslateblue", value) == 0) {
-            color.r = 123;
-            color.g = 104;
-            color.b = 238;
-        } else if (strcasecmp("mediumorchid", value) == 0) {
-            color.r = 186;
-            color.g = 85;
-            color.b = 211;
-        } else if (strcasecmp("mediumpurple", value) == 0) {
-            color.r = 147;
-            color.g = 112;
-            color.b = 219;
-        } else if (strcasecmp("orchid", value) == 0) {
-            color.r = 218;
-            color.g = 112;
-            color.b = 214;
-        } else if (strcasecmp("violet", value) == 0) {
-            color.r = 238;
-            color.g = 130;
-            color.b = 238;
-        } else if (strcasecmp("plum", value) == 0) {
-            color.r = 221;
-            color.g = 160;
-            color.b = 221;
-        } else if (strcasecmp("thistle", value) == 0) {
-            color.r = 216;
-            color.g = 191;
-            color.b = 216;
-        } else if (strcasecmp("lavender", value) == 0) {
-            color.r = 230;
-            color.g = 230;
-            color.b = 250;
-        } 
+        COLOR_FROM_NAME(value, "indigo", 75, 0, 130, color, result);
+        COLOR_FROM_NAME(value, "darkmagenta", 139, 0, 139, color, result);
+        COLOR_FROM_NAME(value, "darkviolet", 148, 0, 211, color, result);
+        COLOR_FROM_NAME(value, "darkslateblue", 72, 61, 139, color, result);
+        COLOR_FROM_NAME(value, "blueviolet", 138, 43, 226, color, result);
+        COLOR_FROM_NAME(value, "darkorchid", 153, 50, 204, color, result);
+        COLOR_FROM_NAME(value, "magenta", 255, 0, 255, color, result);
+        COLOR_FROM_NAME(value, "slateblue", 106, 90, 205, color, result);
+        COLOR_FROM_NAME(value, "mediumslateblue", 123, 104, 238, color, result);
+        COLOR_FROM_NAME(value, "mediumorchid", 186, 85, 211, color, result);
+        COLOR_FROM_NAME(value, "mediumpurple", 147, 112, 219, color, result);
+        COLOR_FROM_NAME(value, "orchid", 218, 112, 214, color, result);
+        COLOR_FROM_NAME(value, "violet", 238, 130, 238, color, result);
+        COLOR_FROM_NAME(value, "plum", 221, 160, 221, color, result);
+        COLOR_FROM_NAME(value, "thistle", 216, 191, 216, color, result);
+        COLOR_FROM_NAME(value, "lavender", 230, 230, 250, color, result);
         // Blue colors
-        else if (strcasecmp("midnightblue", value) == 0) {
-            color.r = 25;
-            color.g = 25;
-            color.b = 112;
-        } else if (strcasecmp("darkblue", value) == 0) {
-            color.r = 0;
-            color.g = 0;
-            color.b = 139;
-        } else if (strcasecmp("mediumblue", value) == 0) {
-            color.r = 0;
-            color.g = 0;
-            color.b = 205;
-        } else if (strcasecmp("royalblue", value) == 0) {
-            color.r = 65;
-            color.g = 105;
-            color.b = 225;
-        } else if (strcasecmp("steelblue", value) == 0) {
-            color.r = 70;
-            color.g = 130;
-            color.b = 180;
-        } else if (strcasecmp("dodgerblue", value) == 0) {
-            color.r = 30;
-            color.g = 144;
-            color.b = 255;
-        } else if (strcasecmp("deepskyblue", value) == 0) {
-            color.r = 0;
-            color.g = 191;
-            color.b = 255;
-        } else if (strcasecmp("cornflowerblue", value) == 0) {
-            color.r = 100;
-            color.g = 149;
-            color.b = 237;
-        } else if (strcasecmp("skyblue", value) == 0) {
-            color.r = 135;
-            color.g = 206;
-            color.b = 235;
-        } else if (strcasecmp("lightskyblue", value) == 0) {
-            color.r = 135;
-            color.g = 206;
-            color.b = 250;
-        } else if (strcasecmp("lightsteelblue", value) == 0) {
-            color.r = 176;
-            color.g = 196;
-            color.b = 222;
-        } else if (strcasecmp("lightblue", value) == 0) {
-            color.r = 173;
-            color.g = 216;
-            color.b = 230;
-        } else if (strcasecmp("powderblue", value) == 0) {
-            color.r = 176;
-            color.g = 224;
-            color.b = 230;
-        } 
+        COLOR_FROM_NAME(value, "midnightblue", 25, 25, 112, color, result);
+        COLOR_FROM_NAME(value, "darkblue", 0, 0, 139, color, result);
+        COLOR_FROM_NAME(value, "mediumblue", 0, 0, 205, color, result);
+        COLOR_FROM_NAME(value, "royalblue", 65, 105, 225, color, result);
+        COLOR_FROM_NAME(value, "steelblue", 70, 130, 180, color, result);
+        COLOR_FROM_NAME(value, "dodgerblue", 30, 144, 255, color, result);
+        COLOR_FROM_NAME(value, "deepskyblue", 0, 191, 255, color, result);
+        COLOR_FROM_NAME(value, "cornflowerblue", 100, 149, 237, color, result);
+        COLOR_FROM_NAME(value, "skyblue", 135, 206, 235, color, result);
+        COLOR_FROM_NAME(value, "lightskyblue", 135, 206, 250, color, result);
+        COLOR_FROM_NAME(value, "lightsteelblue", 176, 196, 222, color, result);
+        COLOR_FROM_NAME(value, "lightblue", 173, 216, 230, color, result);
+        COLOR_FROM_NAME(value, "powderblue", 176, 224, 230, color, result);
         // Cyan colors
-        else if (strcasecmp("darkcyan", value) == 0) {
-            color.r = 0;
-            color.g = 139;
-            color.b = 139;
-        } else if (strcasecmp("lightseagreen", value) == 0) {
-            color.r = 32;
-            color.g = 178;
-            color.b = 170;
-        } else if (strcasecmp("cadetblue", value) == 0) {
-            color.r = 95;
-            color.g = 158;
-            color.b = 160;
-        } else if (strcasecmp("darkturquoise", value) == 0) {
-            color.r = 0;
-            color.g = 206;
-            color.b = 209;
-        } else if (strcasecmp("mediumturquoise", value) == 0) {
-            color.r = 72;
-            color.g = 209;
-            color.b = 204;
-        } else if (strcasecmp("turquoise", value) == 0) {
-            color.r = 64;
-            color.g = 224;
-            color.b = 208;
-        } else if (strcasecmp("cyan", value) == 0) {
-            color.r = 0;
-            color.g = 255;
-            color.b = 255;
-        } else if (strcasecmp("aquamarine", value) == 0) {
-            color.r = 127;
-            color.g = 255;
-            color.b = 212;
-        } else if (strcasecmp("paleturquoise", value) == 0) {
-            color.r = 175;
-            color.g = 238;
-            color.b = 238;
-        } else if (strcasecmp("lightcyan", value) == 0) {
-            color.r = 224;
-            color.g = 255;
-            color.b = 255;
-        } 
+        COLOR_FROM_NAME(value, "darkcyan", 0, 139, 139, color, result);
+        COLOR_FROM_NAME(value, "lightseagreen", 32, 178, 170, color, result);
+        COLOR_FROM_NAME(value, "cadetblue", 95, 158, 160, color, result);
+        COLOR_FROM_NAME(value, "darkturquoise", 0, 206, 209, color, result);
+        COLOR_FROM_NAME(value, "mediumturquoise", 72, 209, 204, color, result);
+        COLOR_FROM_NAME(value, "turquoise", 64, 224, 208, color, result);
+        COLOR_FROM_NAME(value, "cyan", 0, 255, 255, color, result);
+        COLOR_FROM_NAME(value, "aquamarine", 127, 255, 212, color, result);
+        COLOR_FROM_NAME(value, "paleturquoise", 175, 238, 238, color, result);
+        COLOR_FROM_NAME(value, "lightcyan", 224, 255, 255, color, result);
         // Green colors
-        else if (strcasecmp("darkgreen", value) == 0) {
-            color.r = 0;
-            color.g = 100;
-            color.b = 0;
-        } else if (strcasecmp("darkolivegreen", value) == 0) {
-            color.r = 85;
-            color.g = 107;
-            color.b = 47;
-        } else if (strcasecmp("forestgreen", value) == 0) {
-            color.r = 34;
-            color.g = 139;
-            color.b = 34;
-        } else if (strcasecmp("seagreen", value) == 0) {
-            color.r = 46;
-            color.g = 139;
-            color.b = 87;
-        } else if (strcasecmp("olivedrab", value) == 0) {
-            color.r = 107;
-            color.g = 142;
-            color.b = 35;
-        } else if (strcasecmp("mediumseagreen", value) == 0) {
-            color.r = 60;
-            color.g = 179;
-            color.b = 113;
-        } else if (strcasecmp("limegreen", value) == 0) {
-            color.r = 50;
-            color.g = 205;
-            color.b = 50;
-        } else if (strcasecmp("springgreen", value) == 0) {
-            color.r = 0;
-            color.g = 255;
-            color.b = 127;
-        } else if (strcasecmp("mediumspringgreen", value) == 0) {
-            color.r = 0;
-            color.g = 250;
-            color.b = 154;
-        } else if (strcasecmp("darkseagreen", value) == 0) {
-            color.r = 143;
-            color.g = 188;
-            color.b = 143;
-        } else if (strcasecmp("mediumaquamarine", value) == 0) {
-            color.r = 102;
-            color.g = 205;
-            color.b = 170;
-        } else if (strcasecmp("yellowgreen", value) == 0) {
-            color.r = 154;
-            color.g = 205;
-            color.b = 50;
-        } else if (strcasecmp("lawngreen", value) == 0) {
-            color.r = 124;
-            color.g = 252;
-            color.b = 0;
-        } else if (strcasecmp("chartreuse", value) == 0) {
-            color.r = 127;
-            color.g = 255;
-            color.b = 0;
-        } else if (strcasecmp("lightgreen", value) == 0) {
-            color.r = 144;
-            color.g = 238;
-            color.b = 144;
-        } else if (strcasecmp("greenyellow", value) == 0) {
-            color.r = 173;
-            color.g = 255;
-            color.b = 47;
-        } else if (strcasecmp("palegreen", value) == 0) {
-            color.r = 152;
-            color.g = 251;
-            color.b = 152;
-        } 
+        COLOR_FROM_NAME(value, "darkgreen", 0, 100, 0, color, result);
+        COLOR_FROM_NAME(value, "darkolivegreen", 85, 107, 47, color, result);
+        COLOR_FROM_NAME(value, "forestgreen", 34, 139, 34, color, result);
+        COLOR_FROM_NAME(value, "seagreen", 46, 139, 87, color, result);
+        COLOR_FROM_NAME(value, "olivedrab", 107, 142, 35, color, result);
+        COLOR_FROM_NAME(value, "mediumseagreen", 60, 179, 113, color, result);
+        COLOR_FROM_NAME(value, "limegreen", 50, 205, 50, color, result);
+        COLOR_FROM_NAME(value, "springgreen", 0, 255, 127, color, result);
+        COLOR_FROM_NAME(value, "mediumspringgreen", 0, 250, 154, color, result);
+        COLOR_FROM_NAME(value, "darkseagreen", 143, 188, 143, color, result);
+        COLOR_FROM_NAME(value, "mediumaquamarine", 102, 205, 170, color, result);
+        COLOR_FROM_NAME(value, "yellowgreen", 154, 205, 50, color, result);
+        COLOR_FROM_NAME(value, "lawngreen", 124, 252, 0, color, result);
+        COLOR_FROM_NAME(value, "chartreuse", 127, 255, 0, color, result);
+        COLOR_FROM_NAME(value, "lightgreen", 144, 238, 144, color, result);
+        COLOR_FROM_NAME(value, "greenyellow", 173, 255, 47, color, result);
+        COLOR_FROM_NAME(value, "palegreen", 152, 251, 152, color, result);
         // White colors
-        else if (strcasecmp("mistyrose", value) == 0) {
-            color.r = 255;
-            color.g = 228;
-            color.b = 225;
-        } else if (strcasecmp("antiquewhite", value) == 0) {
-            color.r = 250;
-            color.g = 235;
-            color.b = 215;
-        } else if (strcasecmp("linen", value) == 0) {
-            color.r = 250;
-            color.g = 240;
-            color.b = 230;
-        } else if (strcasecmp("beige", value) == 0) {
-            color.r = 245;
-            color.g = 245;
-            color.b = 220;
-        } else if (strcasecmp("whitesmoke", value) == 0) {
-            color.r = 245;
-            color.g = 245;
-            color.b = 245;
-        } else if (strcasecmp("lavenderblush", value) == 0) {
-            color.r = 255;
-            color.g = 240;
-            color.b = 245;
-        } else if (strcasecmp("oldlace", value) == 0) {
-            color.r = 253;
-            color.g = 245;
-            color.b = 230;
-        } else if (strcasecmp("aliceblue", value) == 0) {
-            color.r = 240;
-            color.g = 248;
-            color.b = 255;
-        } else if (strcasecmp("seashell", value) == 0) {
-            color.r = 255;
-            color.g = 245;
-            color.b = 238;
-        } else if (strcasecmp("ghostwhite", value) == 0) {
-            color.r = 248;
-            color.g = 248;
-            color.b = 255;
-        } else if (strcasecmp("honeydew", value) == 0) {
-            color.r = 240;
-            color.g = 255;
-            color.b = 240;
-        } else if (strcasecmp("floralwhite", value) == 0) {
-            color.r = 255;
-            color.g = 250;
-            color.b = 240;
-        } else if (strcasecmp("azure", value) == 0) {
-            color.r = 240;
-            color.g = 255;
-            color.b = 255;
-        } else if (strcasecmp("mintcream", value) == 0) {
-            color.r = 245;
-            color.g = 255;
-            color.b = 250;
-        } else if (strcasecmp("snow", value) == 0) {
-            color.r = 255;
-            color.g = 250;
-            color.b = 250;
-        } else if (strcasecmp("ivory", value) == 0) {
-            color.r = 255;
-            color.g = 255;
-            color.b = 240;
-        }
+        COLOR_FROM_NAME(value, "mistyrose", 255, 228, 225, color, result);
+        COLOR_FROM_NAME(value, "antiquewhite", 250, 235, 215, color, result);
+        COLOR_FROM_NAME(value, "linen", 250, 240, 230, color, result);
+        COLOR_FROM_NAME(value, "beige", 245, 245, 220, color, result);
+        COLOR_FROM_NAME(value, "whitesmoke", 245, 245, 245, color, result);
+        COLOR_FROM_NAME(value, "lavenderblush", 255, 240, 245, color, result);
+        COLOR_FROM_NAME(value, "oldlace", 253, 245, 230, color, result);
+        COLOR_FROM_NAME(value, "aliceblue", 240, 248, 255, color, result);
+        COLOR_FROM_NAME(value, "seashell", 255, 245, 238, color, result);
+        COLOR_FROM_NAME(value, "ghostwhite", 248, 248, 255, color, result);
+        COLOR_FROM_NAME(value, "honeydew", 240, 255, 240, color, result);
+        COLOR_FROM_NAME(value, "floralwhite", 255, 250, 240, color, result);
+        COLOR_FROM_NAME(value, "azure", 240, 255, 255, color, result);
+        COLOR_FROM_NAME(value, "mintcream", 245, 255, 250, color, result);
+        COLOR_FROM_NAME(value, "snow", 255, 250, 250, color, result);
+        COLOR_FROM_NAME(value, "ivory", 255, 255, 240, color, result);
         // Gray and black colors
-        else if (strcasecmp("darkslategray", value) == 0) {
-            color.r = 47;
-            color.g = 79;
-            color.b = 79;
-        } else if (strcasecmp("dimgray", value) == 0) {
-            color.r = 105;
-            color.g = 105;
-            color.b = 105;
-        } else if (strcasecmp("slategray", value) == 0) {
-            color.r = 112;
-            color.g = 128;
-            color.b = 144;
-        } else if (strcasecmp("lightslategray", value) == 0) {
-            color.r = 119;
-            color.g = 136;
-            color.b = 153;
-        } else if (strcasecmp("darkgray", value) == 0) {
-            color.r = 169;
-            color.g = 169;
-            color.b = 169;
-        } else if (strcasecmp("lightgray", value) == 0) {
-            color.r = 211;
-            color.g = 211;
-            color.b = 211;
-        } else if (strcasecmp("gainsboro", value) == 0) {
-            color.r = 220;
-            color.g = 220;
-            color.b = 220;
-        } else {
+        COLOR_FROM_NAME(value, "darkslategray", 47, 79, 79, color, result);
+        COLOR_FROM_NAME(value, "dimgray", 105, 105, 105, color, result);
+        COLOR_FROM_NAME(value, "slategray", 112, 128, 144, color, result);
+        COLOR_FROM_NAME(value, "lightslategray", 119, 136, 153, color, result);
+        COLOR_FROM_NAME(value, "darkgray", 169, 169, 169, color, result);
+        COLOR_FROM_NAME(value, "lightgray", 211, 211, 211, color, result);
+        COLOR_FROM_NAME(value, "gainsboro", 220, 220, 220, color, result);
+        
+        if (result == 0) {
             printf("HTML_ParseColorAttribute: Unknown color %s\n", value);
         }
     }
@@ -1130,16 +568,14 @@ length_t HTML_ParseLengthAttribute(char* value)
 clear_t HTML_ParseClearAttribute(char* value)
 {
     clear_t clear;
+    int result = 0;
 
-    if (strcasecmp("left", value) == 0) {
-        clear = CLEAR_LEFT;
-    } else if (strcasecmp("right", value) == 0) {
-        clear = CLEAR_RIGHT;
-    } else if (strcasecmp("all", value) == 0) {
-        clear = CLEAR_ALL;
-    } else if (strcasecmp("none", value) == 0) {
-        clear = CLEAR_NONE;
-    } else {
+    GEN_FROM_VALUE(value, "left", CLEAR_LEFT, clear, result);
+    GEN_FROM_VALUE(value, "right", CLEAR_RIGHT, clear, result);
+    GEN_FROM_VALUE(value, "all", CLEAR_ALL, clear, result);
+    GEN_FROM_VALUE(value, "none", CLEAR_NONE, clear, result);
+
+    if (result == 0) {
         printf("HTML_ParseClearAttribute: Unknown clear value %s\n", value);
     }
 
@@ -1183,26 +619,19 @@ coords_t HTML_ParseCoordsAttribute(char* value)
 tframe_t HTML_ParseTFrameAttribute(char* value)
 {
     tframe_t tframe;
+    int result = 0;
 
-    if (strcasecmp("void", value) == 0) {
-        tframe = TF_VOID;
-    } else if (strcasecmp("above", value) == 0) {
-        tframe = TF_ABOVE;
-    } else if (strcasecmp("below", value) == 0) {
-        tframe = TF_BELOW;
-    } else if (strcasecmp("hsides", value) == 0) {
-        tframe = TF_HSIDES;
-    } else if (strcasecmp("lhs", value) == 0) {
-        tframe = TF_LHS;
-    } else if (strcasecmp("rhs", value) == 0) {
-        tframe = TF_RHS;
-    } else if (strcasecmp("vsides", value) == 0) {
-        tframe = TF_VSIDES;
-    } else if (strcasecmp("box", value) == 0) {
-        tframe = TF_BOX;
-    } else if (strcasecmp("border", value) == 0) {
-        tframe = TF_BORDER;
-    } else {
+    GEN_FROM_VALUE(value, "void", TF_VOID, tframe, result);
+    GEN_FROM_VALUE(value, "above", TF_ABOVE, tframe, result);
+    GEN_FROM_VALUE(value, "below", TF_BELOW, tframe, result);
+    GEN_FROM_VALUE(value, "hsides", TF_HSIDES, tframe, result);
+    GEN_FROM_VALUE(value, "lhs", TF_LHS, tframe, result);
+    GEN_FROM_VALUE(value, "rhs", TF_RHS, tframe, result);
+    GEN_FROM_VALUE(value, "vsides", TF_VSIDES, tframe, result);
+    GEN_FROM_VALUE(value, "box", TF_BOX, tframe, result);
+    GEN_FROM_VALUE(value, "border", TF_BORDER, tframe, result);
+    
+    if (result == 0) {
         printf("HTML_ParseTFrameAttribute: Unknown tframe %s\n", value);
     }
 
@@ -1212,12 +641,12 @@ tframe_t HTML_ParseTFrameAttribute(char* value)
 method_t HTML_ParseMethodAttribute(char* value)
 {
     method_t method;
+    int result = 0;
 
-    if (strcasecmp("get", value) == 0) {
-        method = METHOD_GET;
-    } else if (strcasecmp("post", value) == 0) {
-        method = METHOD_POST;
-    } else {
+    GEN_FROM_VALUE(value, "get", METHOD_GET, method, result);
+    GEN_FROM_VALUE(value, "post", METHOD_POST, method, result);
+    
+    if (result == 0) {
         printf("HTML_ParseMethodAttribute: Unknown method %s\n", value);
     }
 
@@ -1227,18 +656,15 @@ method_t HTML_ParseMethodAttribute(char* value)
 trules_t HTML_ParseTRulesAttribute(char* value)
 {
     trules_t trules;
+    int result = 0;
 
-    if (strcasecmp("none", value) == 0) {
-        trules = TR_NONE;
-    } else if (strcasecmp("groups", value) == 0) {
-        trules = TR_GROUPS;
-    } else if (strcasecmp("rows", value) == 0) {
-        trules = TR_ROWS;
-    } else if (strcasecmp("cols", value) == 0) {
-        trules = TR_COLS;
-    } else if (strcasecmp("all", value) == 0) {
-        trules = TR_ALL;
-    } else {
+    GEN_FROM_VALUE(value, "none", TR_NONE, trules, result);
+    GEN_FROM_VALUE(value, "groups", TR_GROUPS, trules, result);
+    GEN_FROM_VALUE(value, "rows", TR_ROWS, trules, result);
+    GEN_FROM_VALUE(value, "cols", TR_COLS, trules, result);
+    GEN_FROM_VALUE(value, "all", TR_ALL, trules, result);
+
+    if (result == 0) {
         printf("HTML_ParseTRulesAttribute: Unknown rule %s\n", value);
     }
 
@@ -1248,16 +674,14 @@ trules_t HTML_ParseTRulesAttribute(char* value)
 scope_t HTML_ParseScopeAttribute(char* value)
 {
     scope_t scope;
+    int result = 0;
 
-    if (strcasecmp("row", value) == 0) {
-        scope = SCOPE_ROW;
-    } else if (strcasecmp("col", value) == 0) {
-        scope = SCOPE_COL;
-    } else if (strcasecmp("rowgroup", value) == 0) {
-        scope = SCOPE_ROWGROUP;
-    } else if (strcasecmp("colgroup", value) == 0) {
-        scope = SCOPE_COLGROUP;
-    } else {
+    GEN_FROM_VALUE(value, "row", SCOPE_ROW, scope, result);
+    GEN_FROM_VALUE(value, "col", SCOPE_COL, scope, result);
+    GEN_FROM_VALUE(value, "rowgroup", SCOPE_ROWGROUP, scope, result);
+    GEN_FROM_VALUE(value, "colgroup", SCOPE_COLGROUP, scope, result);
+    
+    if (result == 0) {
         printf("HTML_ParseScopeAttribute: Unknown scope %s\n", value);
     }
 
@@ -1267,14 +691,13 @@ scope_t HTML_ParseScopeAttribute(char* value)
 scroll_t HTML_ParseScrollAttribute(char* value)
 {
     scroll_t scroll;
+    int result = 0;
 
-    if (strcasecmp("yes", value) == 0) {
-        scroll = SCROLL_YES;
-    } else if (strcasecmp("no", value) == 0) {
-        scroll = SCROLL_NO;
-    } else if (strcasecmp("auto", value) == 0) {
-        scroll = SCROLL_AUTO;
-    } else {
+    GEN_FROM_VALUE(value, "yes", SCROLL_YES, scroll, result);
+    GEN_FROM_VALUE(value, "no", SCROLL_NO, scroll, result);
+    GEN_FROM_VALUE(value, "auto", SCROLL_AUTO, scroll, result);
+
+    if (result == 0) {
         printf("HTML_ParseScrollAttribute: Unknown scroll value %s\n", value);
     }
 
@@ -1284,16 +707,14 @@ scroll_t HTML_ParseScrollAttribute(char* value)
 shape_t HTML_ParseShapeAttribute(char* value)
 {
     shape_t shape;
+    int result = 0;
 
-    if (strcasecmp("rect", value) == 0) {
-        shape = SHAPE_RECT;
-    } else if (strcasecmp("circle", value) == 0) {
-        shape = SHAPE_CIRCLE;
-    } else if (strcasecmp("poly", value) == 0) {
-        shape = SHAPE_POLY;
-    } else if (strcasecmp("default", value) == 0) {
-        shape = SHAPE_DEFAULT;
-    } else {
+    GEN_FROM_VALUE(value, "rect", SHAPE_RECT, shape, result);
+    GEN_FROM_VALUE(value, "circle", SHAPE_CIRCLE, shape, result);
+    GEN_FROM_VALUE(value, "poly", SHAPE_POLY, shape, result);
+    GEN_FROM_VALUE(value, "default", SHAPE_DEFAULT, shape, result);
+
+    if (result == 0) {
         printf("HTML_ParseShapeAttribute: Unknown shape %s\n", value);
     }
 
@@ -1326,16 +747,14 @@ char* HTML_ParseStyleSheetAttribute(char* value)
 valign_t HTML_ParseVAlignAttribute(char* value)
 {
     valign_t valign;
+    int result = 0;
 
-    if (strcasecmp("top", value) == 0) {
-        valign = VA_TOP;
-    } else if (strcasecmp("middle", value) == 0) {
-        valign = VA_MIDDLE;
-    } else if (strcasecmp("bottom", value) == 0) {
-        valign = VA_BOTTOM;
-    } else if (strcasecmp("baseline", value) == 0) {
-        valign = VA_BASELINE;
-    } else {
+    GEN_FROM_VALUE(value, "top", VA_TOP, valign, result);
+    GEN_FROM_VALUE(value, "middle", VA_MIDDLE, valign, result);
+    GEN_FROM_VALUE(value, "bottom", VA_BOTTOM, valign, result);
+    GEN_FROM_VALUE(value, "baseline", VA_BASELINE, valign, result);
+
+    if (result == 0) {
         printf("HTML_ParseShapeAttribute: Unknown valign %s\n", value);
     }
 
@@ -1345,14 +764,13 @@ valign_t HTML_ParseVAlignAttribute(char* value)
 valuetype_t HTML_ParseValueTypeAttribute(char* value)
 {
     valuetype_t valuetype;
+    int result = 0;
 
-    if (strcasecmp("data", value) == 0) {
-        valuetype = VT_DATA;
-    } else if (strcasecmp("ref", value) == 0) {
-        valuetype = VT_REF;
-    } else if (strcasecmp("object", value) == 0) {
-        valuetype = VT_OBJECT;
-    } else {
+    GEN_FROM_VALUE(value, "data", VT_DATA, valuetype, result);
+    GEN_FROM_VALUE(value, "ref", VT_REF, valuetype, result);
+    GEN_FROM_VALUE(value, "object", VT_OBJECT, valuetype, result);
+
+    if (result == 0) {
         printf("HTML_ParseValuetypeAttribute: Unknown valuetype %s\n", value);
     }
 
@@ -1442,323 +860,135 @@ void HTML_ParseAttributeContent(char* html_data, char* attribute_name, bool has_
 
     // Iterate through all supported attributes and fill
     // the value accordingly.
+    char* name = attribute_name;
+    int result = 0;
 
-    if (attribute_name[0] == 'a' || attribute_name[0] == 'A') {
-        if (strcasecmp(attribute_name, "abbr") == 0) {
-            attributes->abbr = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "accept-charset") == 0) {
-            attributes->accept_charset = HTML_ParseCharsetsAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "accept") == 0) {
-            attributes->accept = HTML_ParseContentTypesAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "accesskey") == 0) {
-            attributes->accesskey = HTML_ParseCharacterAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "action") == 0) {
-            attributes->action = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "align") == 0) {
-            attributes->align = HTML_ParseAlignAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "alt") == 0) {
-            attributes->alt = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "archive") == 0) {
-            attributes->archive = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "axis") == 0) {
-            attributes->axis = HTML_ParseTextAttribute(real_value);
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+    if (name[0] == 'a' || name[0] == 'A') {
+        ASSIGN_TEXT_ATTR(name, "abbr", attributes->abbr, real_value, result);
+        ASSIGN_CSET_ATTR(name, "accept-charset", attributes->accept_charset,
+                        real_value, result);
+        ASSIGN_CONT_ATTR(name, "accept", attributes->accept, real_value, result);
+        ASSIGN_CHAR_ATTR(name, "accesskey", attributes->accesskey, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "action", attributes->action, real_value, result);
+        ASSIGN_ALGN_ATTR(name, "align", attributes->align, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "alt", attributes->alt, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "archive", attributes->archive, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "axis", attributes->axis, real_value, result);
     } else if (attribute_name[0] == 'b' || attribute_name[0] == 'B') {
-        if (strcasecmp(attribute_name, "background") == 0) {
-            attributes->background = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "bgcolor") == 0) {
-            attributes->bgcolor = HTML_ParseColorAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "border") == 0) {
-            attributes->border = HTML_ParsePixelsAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "bottommargin") == 0) {
-            attributes->bottommargin = HTML_ParseLengthAttribute(real_value);
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_TEXT_ATTR(name, "background", attributes->background, real_value, result);
+        ASSIGN_COLR_ATTR(name, "bgcolor", attributes->bgcolor, real_value, result);
+        ASSIGN_PIXL_ATTR(name, "border", attributes->border, real_value, result);
+        ASSIGN_LENG_ATTR(name, "bottommargin", attributes->bottommargin, real_value, result);
     } else if (attribute_name[0] == 'c' || attribute_name[0] == 'C') {
-        if (strcasecmp(attribute_name, "cellpadding") == 0) {
-            attributes->cellpadding = HTML_ParseLengthAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "cellspacing") == 0) {
-            attributes->cellspacing = HTML_ParseLengthAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "char") == 0) {
-            attributes->_char = HTML_ParseCharacterAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "charoff") == 0) {
-            attributes->charoff = HTML_ParseLengthAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "charset") == 0) {
-            attributes->charset = HTML_ParseCharsetsAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "checked") == 0) {
-            if(attributes->checked != true) {
-                printf("HTML_ParseAttributeContent: Attribute '%s' already defined. Ignoring duplicate definition.\n", attribute_name);
-            } else {
-                attributes->checked = true;
-            }
-        } else if (strcasecmp(attribute_name, "cite") == 0) {
-            attributes->cite = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "class") == 0) {
-            attributes->class = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "classid") == 0) {
-            attributes->class = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "clear") == 0) {
-            attributes->clear = HTML_ParseClearAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "code") == 0) {
-            attributes->code = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "codebase") == 0) {
-            attributes->codebase = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "codetype") == 0) {
-            attributes->codetype = HTML_ParseContentTypesAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "color") == 0) {
-            attributes->color = HTML_ParseColorAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "cols") == 0) {
-            attributes->cols = HTML_ParseLengthAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "colspan") == 0) {
-            attributes->colspan = HTML_ParseNumberAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "compact") == 0) {
-            attributes->compact = true;
-        } else if (strcasecmp(attribute_name, "content") == 0) {
-            attributes->content = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "coords") == 0) {
-            attributes->coords = HTML_ParseCoordsAttribute(real_value);
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_LENG_ATTR(name, "cellpadding", attributes->cellpadding, real_value, result);
+        ASSIGN_LENG_ATTR(name, "cellspacing", attributes->cellspacing, real_value, result);
+        ASSIGN_CHAR_ATTR(name, "char", attributes->_char, real_value, result);
+        ASSIGN_LENG_ATTR(name, "charoff", attributes->charoff, real_value, result);
+        ASSIGN_CSET_ATTR(name, "charset", attributes->charset, real_value, result);
+        ASSIGN_BOOL_ATTR(name, "checked", attributes->checked, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "cite", attributes->cite, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "class", attributes->class, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "classid", attributes->classid, real_value, result);
+        ASSIGN_CLER_ATTR(name, "clear", attributes->clear, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "code", attributes->code, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "codebase", attributes->codebase, real_value, result);
+        ASSIGN_CONT_ATTR(name, "codetype", attributes->codetype, real_value, result);
+        ASSIGN_COLR_ATTR(name, "color", attributes->color, real_value, result);
+        ASSIGN_LENG_ATTR(name, "cols", attributes->cols, real_value, result);
+        ASSIGN_NUMB_ATTR(name, "colspan", attributes->colspan, real_value, result);
+        ASSIGN_BOOL_ATTR(name, "compact", attributes->compact, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "content", attributes->content, real_value, result);
+        ASSIGN_CORD_ATTR(name, "coords", attributes->coords, real_value, result);
     } else if (attribute_name[0] == 'd' || attribute_name[0] == 'D') {
-        if (strcasecmp(attribute_name, "data") == 0) {
-            attributes->data = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "datetime") == 0) {
-            attributes->datetime = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "declare") == 0) {
-            attributes->declare = true;
-        } else if (strcasecmp(attribute_name, "dir") == 0) {
-            attributes->dir = true;
-        } else if (strcasecmp(attribute_name, "disabled") == 0) {
-            attributes->disabled = true;
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_TEXT_ATTR(name, "data", attributes->data, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "datetime", attributes->datetime, real_value, result);
+        ASSIGN_BOOL_ATTR(name, "declare", attributes->declare, real_value, result);
+        ASSIGN_BOOL_ATTR(name, "dir", attributes->dir, real_value, result);
+        ASSIGN_BOOL_ATTR(name, "disabled", attributes->disabled, real_value, result);
     } else if (attribute_name[0] == 'e' || attribute_name[0] == 'E') {
-        if (strcasecmp(attribute_name, "enctype") == 0) {
-            attributes->enctype = HTML_ParseContentTypesAttribute(real_value);
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_CONT_ATTR(name, "enctype", attributes->enctype, real_value, result);
     } else if (attribute_name[0] == 'f' || attribute_name[0] == 'F') {
-        if (strcasecmp(attribute_name, "face") == 0) {
-            attributes->face = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "for") == 0) {
-            attributes->_for = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "frame") == 0) {
-            attributes->frame = HTML_ParseTFrameAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "frameborder") == 0) {
-            if (real_value[0] == '0')
-                attributes->frameborder = false;
-            else if (real_value[0] == '1')
-                attributes->frameborder = true;
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_TEXT_ATTR(name, "face", attributes->face, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "for", attributes->_for, real_value, result);
+        ASSIGN_TFRM_ATTR(name, "frame", attributes->frame, real_value, result);
+        ASSIGN_BOOL_ATTR(name, "frameborder", attributes->frameborder, real_value, result);
     } else if (attribute_name[0] == 'h' || attribute_name[0] == 'H') {
-        if (strcasecmp(attribute_name, "headers") == 0) {
-            attributes->headers = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "height") == 0) {
-            attributes->height = HTML_ParseLengthAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "href") == 0) {
-            attributes->href = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "hreflang") == 0) {
-            attributes->hreflang = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "hspace") == 0) {
-            attributes->hspace = HTML_ParsePixelsAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "http-equiv") == 0) {
-            attributes->http_equiv = HTML_ParseTextAttribute(real_value);
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_TEXT_ATTR(name, "headers", attributes->headers, real_value, result);
+        ASSIGN_LENG_ATTR(name, "height", attributes->height, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "href", attributes->href, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "hreflang", attributes->hreflang, real_value, result);
+        ASSIGN_PIXL_ATTR(name, "hspace", attributes->hspace, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "http-equiv", attributes->http_equiv, real_value, result);
     } else if (attribute_name[0] == 'i' || attribute_name[0] == 'I') {
-        if (strcasecmp(attribute_name, "id") == 0) {
-            attributes->id = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "ismap") == 0) {
-            attributes->ismap = true;
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_TEXT_ATTR(name, "id", attributes->id, real_value, result);
+        ASSIGN_BOOL_ATTR(name, "ismap", attributes->ismap, real_value, result);
     } else if (attribute_name[0] == 'l' || attribute_name[0] == 'L') {
-        if (strcasecmp(attribute_name, "label") == 0) {
-            attributes->label = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "lang") == 0) {
-            attributes->lang = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "language") == 0) {
-            attributes->language = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "leftmargin") == 0) {
-            attributes->leftmargin = HTML_ParseLengthAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "link") == 0) {
-            attributes->link = HTML_ParseColorAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "longdesc") == 0) {
-            attributes->longdesc = HTML_ParseTextAttribute(real_value);
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_TEXT_ATTR(name, "label", attributes->label, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "lang", attributes->lang, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "language", attributes->language, real_value, result);
+        ASSIGN_LENG_ATTR(name, "leftmargin", attributes->leftmargin, real_value, result);
+        ASSIGN_COLR_ATTR(name, "link", attributes->link, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "longdesc", attributes->longdesc, real_value, result);
     } else if (attribute_name[0] == 'm' || attribute_name[0] == 'M') {
-        if (strcasecmp(attribute_name, "marginheight") == 0) {
-            attributes->marginheight = HTML_ParsePixelsAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "marginwidth") == 0) {
-            attributes->marginwidth = HTML_ParsePixelsAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "maxlength") == 0) {
-            attributes->maxlength = HTML_ParseNumberAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "media") == 0) {
-            attributes->media = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "method") == 0) {
-            attributes->method = HTML_ParseMethodAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "multiple") == 0) {
-            attributes->multiple = true;
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_PIXL_ATTR(name, "marginheight", attributes->marginheight, real_value, result);
+        ASSIGN_PIXL_ATTR(name, "marginwidth", attributes->marginwidth, real_value, result);
+        ASSIGN_NUMB_ATTR(name, "maxlength", attributes->maxlength, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "media", attributes->media, real_value, result);
+        ASSIGN_MTHD_ATTR(name, "method", attributes->method, real_value, result);
+        ASSIGN_BOOL_ATTR(name, "multiple", attributes->multiple, real_value, result);
     } else if (attribute_name[0] == 'n' || attribute_name[0] == 'N') {
-        if (strcasecmp(attribute_name, "name") == 0) {
-            attributes->name = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "nohref") == 0) {
-            attributes->nohref = true;
-        } else if (strcasecmp(attribute_name, "noresize") == 0) {
-            attributes->noresize = true;
-        } else if (strcasecmp(attribute_name, "noshade") == 0) {
-            attributes->noshade = true;
-        } else if (strcasecmp(attribute_name, "nowrap") == 0) {
-            attributes->nowrap = true;
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_TEXT_ATTR(name, "name", attributes->name, real_value, result);
+        ASSIGN_BOOL_ATTR(name, "nohref", attributes->nohref, real_value, result);
+        ASSIGN_BOOL_ATTR(name, "noresize", attributes->noresize, real_value, result);
+        ASSIGN_BOOL_ATTR(name, "noshade", attributes->noshade, real_value, result);
+        ASSIGN_BOOL_ATTR(name, "nowrap", attributes->nowrap, real_value, result);
     } else if (attribute_name[0] == 'o' || attribute_name[0] == 'O') {
-        if (strcasecmp(attribute_name, "object") == 0) {
-            attributes->object = HTML_ParseTextAttribute(real_value);
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_TEXT_ATTR(name, "object", attributes->object, real_value, result);
     } else if (attribute_name[0] == 'p' || attribute_name[0] == 'P') {
-        if (strcasecmp(attribute_name, "profile") == 0) {
-            attributes->profile = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "prompt") == 0) {
-            attributes->prompt = HTML_ParseTextAttribute(real_value);
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_TEXT_ATTR(name, "profile", attributes->profile, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "prompt", attributes->prompt, real_value, result);
     } else if (attribute_name[0] == 'r' || attribute_name[0] == 'R') {
-        if (strcasecmp(attribute_name, "readonly") == 0) {
-            attributes->readonly = true;
-        } else if (strcasecmp(attribute_name, "rel") == 0) {
-            attributes->rel = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "required") == 0) {
-            if(attributes->required != true) {
-                printf("HTML_ParseAttributeContent: Attribute '%s' already defined. Ignoring duplicate definition.\n", attribute_name);
-            } else {
-                attributes->required = true;
-            }
-            attributes->required = true;
-        } else if (strcasecmp(attribute_name, "rightmargin") == 0) {
-            attributes->rightmargin = HTML_ParseLengthAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "rows") == 0) {
-            attributes->rows = HTML_ParseLengthAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "rowspan") == 0) {
-            attributes->rowspan = HTML_ParseNumberAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "rules") == 0) {
-            attributes->rules = HTML_ParseTRulesAttribute(real_value);
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_BOOL_ATTR(name, "readonly", attributes->readonly, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "rel", attributes->rel, real_value, result);
+        ASSIGN_BOOL_ATTR(name, "required", attributes->required, real_value, result);
+        ASSIGN_LENG_ATTR(name, "rightmargin", attributes->rightmargin, real_value, result);
+        ASSIGN_LENG_ATTR(name, "rows", attributes->rows, real_value, result);
+        ASSIGN_NUMB_ATTR(name, "rowspan", attributes->rowspan, real_value, result);
+        ASSIGN_TRLE_ATTR(name, "rules", attributes->rules, real_value, result);
     } else if (attribute_name[0] == 's' || attribute_name[0] == 'S') {
-        if (strcasecmp(attribute_name, "scheme") == 0) {
-            attributes->scheme = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "scope") == 0) {
-            attributes->scope = HTML_ParseScopeAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "scrolling") == 0) {
-            attributes->scrolling = HTML_ParseScrollAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "selected") == 0) {
-            attributes->selected = true;
-        } else if (strcasecmp(attribute_name, "shape") == 0) {
-            attributes->shape = HTML_ParseShapeAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "size") == 0) {
-            attributes->size = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "span") == 0) {
-            attributes->span = HTML_ParseNumberAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "src") == 0) {
-            attributes->src = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "standby") == 0) {
-            attributes->standby = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "start") == 0) {
-            attributes->start = HTML_ParseNumberAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "style") == 0) {
-            if(attributes->style != NULL) {
-                printf("HTML_ParseAttributeContent: Attribute '%s' already defined. Ignoring duplicate definition.\n", attribute_name);
-            } else {
-                attributes->style = HTML_ParseStyleSheetAttribute(real_value);
-            }
-        } else if (strcasecmp(attribute_name, "summary") == 0) {
-            attributes->summary = HTML_ParseTextAttribute(real_value);
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_TEXT_ATTR(name, "scheme", attributes->scheme, real_value, result);
+        ASSIGN_SCOP_ATTR(name, "scope", attributes->scope, real_value, result);
+        ASSIGN_SCRL_ATTR(name, "scrolling", attributes->scrolling, real_value, result);
+        ASSIGN_BOOL_ATTR(name, "selected", attributes->selected, real_value, result);
+        ASSIGN_SHPE_ATTR(name, "shape", attributes->shape, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "size", attributes->size, real_value, result);
+        ASSIGN_NUMB_ATTR(name, "span", attributes->span, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "src", attributes->src, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "standby", attributes->standby, real_value, result);
+        ASSIGN_NUMB_ATTR(name, "start", attributes->start, real_value, result);
+        ASSIGN_STYL_ATTR(name, "style", attributes->style, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "summary", attributes->summary, real_value, result);
     } else if (attribute_name[0] == 't' || attribute_name[0] == 'T') {
-        if (strcasecmp(attribute_name, "tabindex") == 0) {
-            attributes->tabindex = HTML_ParseNumberAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "target") == 0) {
-            attributes->target = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "text") == 0) {
-            attributes->text = HTML_ParseColorAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "title") == 0) {
-            attributes->title = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "topmargin") == 0) {
-            attributes->topmargin = HTML_ParseLengthAttribute(real_value);
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_NUMB_ATTR(name, "tabindex", attributes->tabindex, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "target", attributes->target, real_value, result);
+        ASSIGN_COLR_ATTR(name, "text", attributes->text, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "title", attributes->title, real_value, result);
+        ASSIGN_LENG_ATTR(name, "topmargin", attributes->topmargin, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "type", attributes->type, real_value, result);
     } else if (attribute_name[0] == 'u' || attribute_name[0] == 'U') {
-        if (strcasecmp(attribute_name, "usemap") == 0) {
-            attributes->usemap = HTML_ParseTextAttribute(real_value);
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_TEXT_ATTR(name, "usemap", attributes->usemap, real_value, result);
     } else if (attribute_name[0] == 'v' || attribute_name[0] == 'V') {
-        if (strcasecmp(attribute_name, "valign") == 0) {
-            attributes->valign = HTML_ParseVAlignAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "value") == 0) {
-            attributes->value = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "valuetype") == 0) {
-            attributes->valuetype = HTML_ParseValueTypeAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "version") == 0) {
-            attributes->version = HTML_ParseTextAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "vlink") == 0) {
-            attributes->vlink = HTML_ParseColorAttribute(real_value);
-        } else if (strcasecmp(attribute_name, "vspace") == 0) {
-            attributes->vspace = HTML_ParsePixelsAttribute(real_value);
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
+        ASSIGN_VALN_ATTR(name, "valign", attributes->valign, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "value", attributes->value, real_value, result);
+        ASSIGN_VALT_ATTR(name, "valuetype", attributes->valuetype, real_value, result);
+        ASSIGN_TEXT_ATTR(name, "version", attributes->version, real_value, result);
+        ASSIGN_COLR_ATTR(name, "vlink", attributes->vlink, real_value, result);
+        ASSIGN_PIXL_ATTR(name, "vspace", attributes->vspace, real_value, result);
     } else if (attribute_name[0] == 'w' || attribute_name[0] == 'W') {
-        if (strcasecmp(attribute_name, "width") == 0) {
-            attributes->width = HTML_ParseLengthAttribute(real_value);
-        } else {
-            printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
-            attribute_name);
-        }
-    } else {
+        ASSIGN_LENG_ATTR(name, "width", attributes->width, real_value, result);
+    } 
+    
+    if (result == 0) {
         printf("HTML_ParseAttributeContent: Unrecognized attribute name %s\n", 
         attribute_name);
     }
