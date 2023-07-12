@@ -27,7 +27,7 @@ typedef enum {
 // (https://www.geeksforgeeks.org/http-headers-content-type/)
 typedef enum {
     // Application
-    CTYPE_APP_NONE = -1,
+    CTYPE_NONE = -1,
     CTYPE_APP_EDIX12,
     CTYPE_APP_EDIFACT,
     CTYPE_APP_JS,
@@ -101,6 +101,7 @@ typedef struct {
     byte r;
     byte g;
     byte b;
+    bool used;
 } color_t;
 
 //==== CDATA ====//

@@ -128,7 +128,7 @@ void HTML_InitializeAttribute(attribute_t* attr) {
     // A
     attr->abbr              = NULL;
     attr->accept_charset    = CS_NONE;
-    attr->accept            = CTYPE_APP_NONE;
+    attr->accept            = CTYPE_NONE;
     attr->accesskey         = '\0';
     attr->action            = NULL;
     attr->align             = ALIGN_NONE;
@@ -137,9 +137,7 @@ void HTML_InitializeAttribute(attribute_t* attr) {
     attr->axis              = NULL;
     // B
     attr->background        = NULL;
-    attr->bgcolor.r         = -1;
-    attr->bgcolor.g         = -1;
-    attr->bgcolor.b         = -1;
+    attr->bgcolor.used      = false;
     attr->border            = -1;
     // C
     attr->cellpadding.len   = -1;
@@ -150,10 +148,8 @@ void HTML_InitializeAttribute(attribute_t* attr) {
     attr->clear             = CLEAR_NONE;
     attr->code              = NULL;
     attr->codebase          = NULL;
-    attr->codetype          = CTYPE_APP_NONE;
-    attr->color.r           = -1;
-    attr->color.g           = -1;
-    attr->color.b           = -1;
+    attr->codetype          = CTYPE_NONE;
+    attr->color.used        = false;
     attr->cols.len          = -1;
     attr->colspan           = -1;
     attr->compact           = NULL;
@@ -169,7 +165,7 @@ void HTML_InitializeAttribute(attribute_t* attr) {
     attr->dir               = false;
     attr->disabled          = false;
     // E
-    attr->enctype           = CTYPE_APP_NONE;
+    attr->enctype           = CTYPE_NONE;
     // F
     attr->face              = NULL;
     attr->_for              = NULL;
@@ -189,9 +185,7 @@ void HTML_InitializeAttribute(attribute_t* attr) {
     attr->label             = NULL;
     attr->lang              = NULL;
     attr->language          = NULL;
-    attr->link.r            = -1;
-    attr->link.g            = -1;
-    attr->link.b            = -1;
+    attr->link.used         = false;
     attr->longdesc          = NULL;
     // M
     attr->marginheight      = -1;
@@ -233,9 +227,7 @@ void HTML_InitializeAttribute(attribute_t* attr) {
     // T
     attr->tabindex          = -1;
     attr->target            = NULL;
-    attr->text.r            = -1;
-    attr->text.b            = -1;
-    attr->text.g            = -1;
+    attr->text.used         = false;
     attr->title             = NULL;
     // U
     attr->usemap            = NULL;
@@ -244,9 +236,7 @@ void HTML_InitializeAttribute(attribute_t* attr) {
     attr->value             = NULL;
     attr->valuetype         = VT_NONE;
     attr->version           = NULL;
-    attr->vlink.r           = -1;
-    attr->vlink.g           = -1;
-    attr->vlink.b           = -1;
+    attr->vlink.used        = false;
     attr->vspace            = -1;
     // W
     attr->width.len         = -1;
